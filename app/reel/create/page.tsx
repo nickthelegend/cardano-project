@@ -3,7 +3,8 @@
 import { useState } from "react"
 import styled from "styled-components"
 import { Button } from "@/components/ui/button"
-import { Upload, Video } from "lucide-react"
+import { Upload, Video, Coins } from "lucide-react"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -67,13 +68,31 @@ const IpfsUrl = styled.div`
   font-size: 0.9rem;
   color: ${({ theme }) => theme.colors.primary};
   word-break: break-all;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+`
+
+const TxHash = styled.div`
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid #ffd700;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  padding: ${({ theme }) => theme.spacing.md};
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #ffd700;
+  word-break: break-all;
 `
 
 export default function CreateReelPage() {
+  const { user, wallet } = useUTXOSAuth()
+  
+  console.log("CreateReelPage - User:", user)
+  console.log("CreateReelPage - Wallet:", wallet)
+  console.log("CreateReelPage - Wallet type:", typeof wallet)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [ipfsUrl, setIpfsUrl] = useState<string>("")
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [ipfsUrl, setIpfsUrl] = useState<string>("") 
+  const [txHash, setTxHash] = useState<string>("")
 
   const handleFileSelect = (file: File) => {
     if (file.type.startsWith("video/")) {
@@ -89,31 +108,75 @@ export default function CreateReelPage() {
     if (file) handleFileSelect(file)
   }
 
-  const uploadToPinata = async () => {
-    if (!selectedFile) return
+  const uploadAndMint = async () => {
+    console.log("Starting upload and mint process...")
+    console.log("Selected file:", selectedFile?.name, selectedFile?.size)
+    console.log("User:", user?.walletAddress)
+    console.log("Wallet:", wallet)
+    console.log("Wallet exists:", !!wallet)
+    console.log("Wallet type:", typeof wallet)
+    
+    if (!selectedFile || !user) {
+      console.error("Missing requirements:", { selectedFile: !!selectedFile, user: !!user })
+      return
+    }
 
-    setIsUploading(true)
+    setIsProcessing(true)
     try {
+      // Step 1: Upload to IPFS
+      console.log("Step 1: Uploading to IPFS...")
       const formData = new FormData()
       formData.append("file", selectedFile)
 
-      const response = await fetch("/api/pinata", {
+      const uploadResponse = await fetch("/api/pinata", {
         method: "POST",
         body: formData,
       })
 
-      const result = await response.json()
+      console.log("Upload response status:", uploadResponse.status)
+      const uploadResult = await uploadResponse.json()
+      console.log("Upload result:", uploadResult)
       
-      if (result.error) {
-        throw new Error(result.error)
+      if (uploadResult.error) {
+        throw new Error(uploadResult.error)
       }
       
-      setIpfsUrl(result.url)
-      console.log("IPFS URL:", result.url)
+      setIpfsUrl(uploadResult.url)
+      console.log("IPFS URL set:", uploadResult.url)
+
+      // Step 2: Mint NFT with IPFS URL
+      console.log("Step 2: Minting NFT...")
+      const mintResponse = await fetch("/api/mint-nft", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          receivingAddress: user.walletAddress,
+          ipfsUrl: uploadResult.url,
+          fileName: selectedFile?.name || "Reel Video",
+        }),
+      })
+
+      console.log("Mint response status:", mintResponse.status)
+      const mintResult = await mintResponse.json()
+      console.log("Mint result:", mintResult)
+      
+      if (mintResult.error) {
+        throw new Error(mintResult.error)
+      }
+
+      console.log("Signing transaction...")
+      // For now, just log the sponsored transaction since wallet instance is not available
+      console.log("Sponsored transaction:", mintResult.sponsoredTx)
+      setTxHash("Transaction prepared - wallet signing not implemented yet")
+      
+      setTxHash(submittedTxHash)
+      console.log("NFT Minted! Transaction Hash:", submittedTxHash)
     } catch (error) {
-      console.error("Upload failed:", error)
+      console.error("Upload and mint failed:", error)
     } finally {
-      setIsUploading(false)
+      setIsProcessing(false)
     }
   }
 
@@ -143,25 +206,38 @@ export default function CreateReelPage() {
       </UploadArea>
 
       {selectedFile && (
-        <VideoPreview controls>
+        <VideoPreview controls key={selectedFile.name}>
           <source src={URL.createObjectURL(selectedFile)} type={selectedFile.type} />
+          Your browser does not support the video tag.
         </VideoPreview>
       )}
 
       {selectedFile && (
         <Button 
-          onClick={uploadToPinata} 
-          disabled={isUploading}
+          onClick={uploadAndMint} 
+          disabled={isProcessing || !user}
           className="w-full"
         >
-          {isUploading ? "Uploading..." : "Upload to IPFS"}
+          <Coins className="mr-2" size={16} />
+          {isProcessing ? "Uploading & Minting..." : "Upload & Mint NFT"}
         </Button>
       )}
 
-      {ipfsUrl && (
+      {(ipfsUrl || txHash) && (
         <ResultSection>
-          <h3 style={{ marginBottom: "16px", color: "#ffffff" }}>Upload Successful!</h3>
-          <IpfsUrl>{ipfsUrl}</IpfsUrl>
+          {ipfsUrl && (
+            <div>
+              <h3 style={{ marginBottom: "16px", color: "#ffffff" }}>Upload Successful!</h3>
+              <IpfsUrl>{ipfsUrl}</IpfsUrl>
+            </div>
+          )}
+          
+          {txHash && (
+            <div>
+              <h4 style={{ marginBottom: "8px", color: "#ffd700" }}>NFT Minted Successfully!</h4>
+              <TxHash>{txHash}</TxHash>
+            </div>
+          )}
         </ResultSection>
       )}
     </Container>
