@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import StyledComponentsRegistry from "@/lib/registry"
 import { UTXOSAuthProvider } from "@/hooks/use-utxos-auth"
+import { AppShell } from "@/components/app-shell"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,7 +25,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <StyledComponentsRegistry>
           <ThemeProvider>
-            <UTXOSAuthProvider>{children}</UTXOSAuthProvider>
+            <UTXOSAuthProvider>
+              <AppShell>{children}</AppShell>
+            </UTXOSAuthProvider>
           </ThemeProvider>
         </StyledComponentsRegistry>
       </body>

@@ -3,12 +3,14 @@
 ## Project Overview
 **Name**: ScrollVibe - Scroll to Earn  
 **Type**: Next.js 14 + TypeScript + Styled Components + Tailwind CSS  
-**Purpose**: Social media app where users earn tokens by scrolling reels
+**Purpose**: Social media app where users earn tokens by scrolling reels  
+**Blockchain**: Cardano integration via UTXOS wallet
 
 ## Tech Stack
 - **Framework**: Next.js 14.2.16 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4 + Styled Components + shadcn/ui
+- **Blockchain**: UTXOS wallet + Blockfrost API + MeshSDK
 - **Database**: Supabase (configured but using mock auth)
 - **State**: React Context + Local Storage
 - **UI**: Radix UI components + Framer Motion
@@ -18,6 +20,8 @@
 ### Core Directories
 ```
 app/                    # Next.js App Router pages
+├── api/               # API routes
+│   └── blockfrost/    # Secure Blockfrost proxy
 ├── home/              # Home dashboard page
 ├── reel/              # Reel feed page
 ├── wallet/            # Token wallet page
@@ -38,12 +42,15 @@ components/            # React components
 ├── energy-system.tsx # Energy/scroll mechanics
 ├── token-wallet.tsx  # Token management
 ├── daily-challenges.tsx # Challenge system
+├── login-form.tsx    # Mock login form
+├── utxos-login-form.tsx # UTXOS wallet login
 └── [other components] # Various UI components
 
 hooks/                # Custom React hooks
-├── use-auth.tsx      # Authentication logic
+├── use-auth.tsx      # Mock authentication logic
+├── use-utxos-auth.tsx # UTXOS wallet authentication
 ├── use-energy-system.tsx # Energy/scroll mechanics
-├── use-energy.ts     # Energy state management
+├── use-scroll-rewards.tsx # Scroll reward system
 └── use-mobile.ts     # Mobile detection
 
 lib/                  # Utilities and configurations
@@ -127,12 +134,28 @@ npm run start  # Production server
 ## Important Notes
 
 ### Current Implementation Status
-- **Auth**: Mock implementation using localStorage (Supabase configured but not used)
-- **Data**: All data is mock/local storage based
-- **API**: Mock crypto API for token data
-- **Tokens**: Simulated token earning system with energy mechanics
-- **UI**: Fully functional with responsive design
-- **Navigation**: Complete mobile/desktop navigation systems
+
+#### Authentication Systems
+- **Mock Auth**: `use-auth.tsx` - localStorage-based mock authentication
+- **UTXOS Auth**: `use-utxos-auth.tsx` - Real Cardano wallet integration
+- **Components**: Both `login-form.tsx` and `utxos-login-form.tsx` available
+
+#### Blockchain Integration
+- **UTXOS Wallet**: MeshSDK integration for Cardano wallets
+- **Blockfrost API**: Secure server-side proxy at `/api/blockfrost/[...slug]`
+- **Network Support**: Preprod (testnet) and Mainnet configurations
+- **Real Balances**: Fetches actual ADA balances from Cardano blockchain
+
+#### Data & APIs
+- **Mock Data**: All app data is localStorage-based
+- **Crypto API**: Mock crypto price data
+- **Energy System**: Persistent energy mechanics with localStorage
+- **Scroll Rewards**: Token earning simulation
+
+#### UI & Navigation
+- **Responsive Design**: Complete mobile/desktop layouts
+- **Route-based Navigation**: 5 main routes with proper Next.js routing
+- **Component Library**: 40+ shadcn/ui components integrated
 
 ### Mobile Responsiveness
 - Uses `useIsMobile` hook for detection
@@ -148,13 +171,26 @@ npm run start  # Production server
 ## Key Components Overview
 
 ### Essential Components
+
+#### Core Application
 - `app-shell.tsx` - Application shell and navigation wrapper
 - `home-screen.tsx` - Dashboard with user stats and welcome
 - `reel-feed.tsx` - Core scrolling interface
 - `energy-system.tsx` - Energy mechanics and token earning
 - `token-wallet.tsx` - Token management and conversion
 - `sidebar.tsx` / `bottom-navigation.tsx` - Navigation systems
-- `login-form.tsx` - Authentication interface
+- `scroll-progress.tsx` - Daily progress tracker (home page only)
+
+#### Authentication
+- `login-form.tsx` - Mock authentication interface
+- `utxos-login-form.tsx` - UTXOS wallet connection interface
+- `use-auth.tsx` - Mock authentication hook
+- `use-utxos-auth.tsx` - UTXOS wallet authentication hook
+
+#### Blockchain Integration
+- `/api/blockfrost/[...slug]/route.ts` - Secure Blockfrost API proxy
+- MeshSDK integration for Cardano wallet operations
+- Environment-based network configuration
 
 ### Feature Components
 - `daily-challenges.tsx` - Challenge system
@@ -163,12 +199,42 @@ npm run start  # Production server
 - `quests-panel.tsx` - Quest management
 - `profile-badges.tsx` - User achievements
 
+## UTXOS Integration Status
+
+### ✅ Implemented
+- UTXOS wallet connection via MeshSDK
+- Secure Blockfrost API proxy for blockchain data
+- Real ADA balance fetching
+- Environment-based network configuration
+- Professional wallet connection UI
+- Error handling and loading states
+
+### 📋 Required Setup
+1. **Environment Variables** (create `.env` file):
+   ```env
+   NEXT_PUBLIC_UTXOS_PROJECT_ID=your_project_id
+   NEXT_PUBLIC_NETWORK_ID=0
+   BLOCKFROST_API_KEY_PREPROD=your_preprod_key
+   BLOCKFROST_API_KEY_MAINNET=your_mainnet_key
+   ```
+
+2. **UTXOS Account**: Create project at [utxos.dev/dashboard](https://utxos.dev/dashboard)
+3. **Blockfrost API**: Get keys from [blockfrost.io/dashboard](https://blockfrost.io/dashboard)
+
+### 🔄 Integration Options
+The project supports both authentication systems:
+- **Mock Auth**: Quick development and testing
+- **UTXOS Auth**: Real Cardano wallet integration
+
+Switch between them by changing the import in your components.
+
 ## Future Development Areas
-1. **Backend Integration**: Connect Supabase auth and real data
-2. **Real Token System**: Implement actual cryptocurrency/blockchain integration
-3. **Content Management**: Real reel/content system with user uploads
-4. **Social Features**: User interactions, following, comments
-5. **Performance**: Optimize for mobile scrolling and real-time updates
+1. **Choose Auth System**: Decide between mock or UTXOS authentication
+2. **Backend Integration**: Connect Supabase for user data persistence
+3. **Token Economics**: Implement real token contracts on Cardano
+4. **Content Management**: Real reel/content system with user uploads
+5. **Social Features**: User interactions, following, comments
+6. **Performance**: Optimize for mobile scrolling and real-time updates
 
 ## Route Structure
 
@@ -183,17 +249,40 @@ npm run start  # Production server
 - `/profile` - User profile management
 
 ### Navigation Flow
-1. **Unauthenticated**: Shows login form on root page
+1. **Unauthenticated**: Shows login form on root page (mock or UTXOS)
 2. **Authenticated**: Redirects to /home, navigation available
 3. **Mobile**: Bottom navigation with 5 main routes
 4. **Desktop**: Sidebar navigation with all routes
+5. **Special**: ScrollProgress component only shows on /home route
+
+### Authentication Switching
+To switch from mock to UTXOS authentication:
+1. Replace `useAuth` with `useUTXOSAuth` in components
+2. Replace `LoginForm` with `UTXOSLoginForm` in page.tsx
+3. Replace `AuthProvider` with `UTXOSAuthProvider` in layout.tsx
+4. Set up environment variables for UTXOS/Blockfrost
+
+## Package Dependencies
+
+### Key Additions for UTXOS
+- `@meshsdk/web3-sdk`: Cardano wallet integration
+- `@meshsdk/provider`: Blockchain data provider
+- MeshSDK handles UTXOS wallet connections and Cardano operations
+
+### Complete Dependency List
+- **UI**: @radix-ui/* components, lucide-react, framer-motion
+- **Styling**: styled-components, tailwindcss, class-variance-authority
+- **Forms**: react-hook-form, zod validation
+- **Charts**: recharts for data visualization
+- **Blockchain**: @meshsdk/* for Cardano integration
+- **Backend**: @supabase/supabase-js (configured but unused)
 
 ## Quick Reference Commands
 ```bash
 # Install dependencies
 npm install
 
-# Start development
+# Start development (requires .env setup for UTXOS)
 npm run dev
 
 # Add new shadcn component
@@ -201,4 +290,9 @@ npx shadcn@latest add [component-name]
 
 # Type checking
 npx tsc --noEmit
+
+# Test UTXOS integration
+# 1. Set up .env file with UTXOS credentials
+# 2. Replace login-form with utxos-login-form in page.tsx
+# 3. Replace useAuth with useUTXOSAuth in components
 ```
