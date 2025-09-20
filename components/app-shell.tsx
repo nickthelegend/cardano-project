@@ -60,8 +60,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {showNavigation && isMobile && <BottomNavigation activeView={getActiveView()} />}
       {showNavigation && (
         <>
-          <EnergyBar />
-          <EnergySystem />
+          {/* <EnergyBar /> */}
           {pathname === "/home" && <ScrollProgress />}
         </>
       )}

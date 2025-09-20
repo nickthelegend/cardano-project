@@ -3,6 +3,7 @@
 import styled from "styled-components"
 import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 import Link from "next/link"
+import { Copy } from "lucide-react"
 
 const SidebarContainer = styled.aside`
   position: fixed;
@@ -24,13 +25,17 @@ const SidebarContainer = styled.aside`
 `
 
 const UserProfile = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
   padding: ${({ theme }) => theme.spacing.md};
   border-radius: ${({ theme }) => theme.borderRadius.lg};
   background: rgba(0, 0, 0, 0.4);
   margin-bottom: ${({ theme }) => theme.spacing.xl};
+`
+
+const ProfileHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-bottom: ${({ theme }) => theme.spacing.md};
 `
 
 const Avatar = styled.div`
@@ -57,9 +62,37 @@ const Username = styled.h3`
   color: #ffffff;
 `
 
-const UserHandle = styled.p`
+const WalletSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  padding: ${({ theme }) => theme.spacing.sm};
+`
+
+const WalletAddress = styled.span`
   font-size: 0.8rem;
   color: #cccccc;
+  font-family: monospace;
+  flex: 1;
+`
+
+const CopyButton = styled.button`
+  background: transparent;
+  border: none;
+  color: ${({ theme }) => theme.colors.primary};
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(99, 219, 154, 0.2);
+  }
 `
 
 const Navigation = styled.nav`
@@ -106,33 +139,7 @@ const NavIcon = styled.span`
   justify-content: center;
 `
 
-const TokenDisplay = styled.div`
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  padding: ${({ theme }) => theme.spacing.md};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-`
 
-const TokenRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`
-
-const TokenName = styled.span`
-  font-size: 0.9rem;
-  color: #cccccc;
-`
-
-const TokenAmount = styled.span`
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.primary};
-`
 
 const LogoutButton = styled.button`
   width: 100%;
@@ -158,32 +165,32 @@ interface SidebarProps {
 export function Sidebar({ activeView }: SidebarProps) {
   const { user, disconnectWallet } = useUTXOSAuth()
 
+  const copyToClipboard = async () => {
+    if (user?.walletAddress) {
+      await navigator.clipboard.writeText(user.walletAddress)
+    }
+  }
+
   if (!user) return null
 
   return (
     <SidebarContainer>
       <UserProfile>
-        <Avatar>{user.walletAddress.charAt(0).toUpperCase()}</Avatar>
-        <UserInfo>
-          <Username>{user.username}</Username>
-          <UserHandle>{user.walletAddress.slice(0, 8)}...{user.walletAddress.slice(-8)}</UserHandle>
-        </UserInfo>
+        <ProfileHeader>
+          <Avatar>{user.username.charAt(0).toUpperCase()}</Avatar>
+          <UserInfo>
+            <Username>{user.username}</Username>
+          </UserInfo>
+        </ProfileHeader>
+        <WalletSection>
+          <WalletAddress>
+            {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
+          </WalletAddress>
+          <CopyButton onClick={copyToClipboard}>
+            <Copy size={14} />
+          </CopyButton>
+        </WalletSection>
       </UserProfile>
-
-      <TokenDisplay>
-        <TokenRow>
-          <TokenName>ADA</TokenName>
-          <TokenAmount>{user.adaBalance.toFixed(2)}</TokenAmount>
-        </TokenRow>
-        <TokenRow>
-          <TokenName>$Scroll</TokenName>
-          <TokenAmount>{user.scrollTokens.toLocaleString()}</TokenAmount>
-        </TokenRow>
-        <TokenRow>
-          <TokenName>$Vibe</TokenName>
-          <TokenAmount>{user.vibeTokens.toLocaleString()}</TokenAmount>
-        </TokenRow>
-      </TokenDisplay>
 
       <Navigation>
         <NavList>
