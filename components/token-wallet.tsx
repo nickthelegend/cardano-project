@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 import { TokenConversion } from "./token-conversion"
 import { StakingSystem } from "./staking-system"
 import { GovernanceDAO } from "./governance-dao"
@@ -321,7 +321,7 @@ const mockTransactions: Transaction[] = [
 ]
 
 export function TokenWallet() {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [transactions] = useState<Transaction[]>(mockTransactions)
 
   if (!user) return null

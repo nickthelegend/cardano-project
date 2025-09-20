@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const ConversionContainer = styled.div`
   background: rgba(0, 0, 0, 0.4);
@@ -128,7 +128,7 @@ const BreakdownRow = styled.div`
 `
 
 export function TokenConversion() {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [scrollAmount, setScrollAmount] = useState("")
 
   if (!user) return null

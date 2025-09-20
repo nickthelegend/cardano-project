@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const GovernanceContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
@@ -217,7 +217,7 @@ const mockProposals: Proposal[] = [
 ]
 
 export function GovernanceDAO() {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [proposals] = useState<Proposal[]>(mockProposals)
 
   if (!user) return null

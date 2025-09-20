@@ -6,7 +6,7 @@ import { BottomNavigation } from "./bottom-navigation"
 import { EnergySystem } from "./energy-system"
 import { EnergyBar } from "./energy-bar"
 import { ScrollProgress } from "./scroll-progress"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from "next/navigation"
 
@@ -32,7 +32,7 @@ const ContentArea = styled.div`
 `
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const isMobile = useIsMobile()
   const pathname = usePathname()
 
@@ -62,7 +62,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <>
           <EnergyBar />
           <EnergySystem />
-          <ScrollProgress />
+          {pathname === "/home" && <ScrollProgress />}
         </>
       )}
     </AppContainer>

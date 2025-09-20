@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const ChallengesContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
@@ -197,7 +197,7 @@ const mockChallenges: Challenge[] = [
 ]
 
 export function DailyChallenges() {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [challenges, setChallenges] = useState<Challenge[]>(mockChallenges)
 
   if (!user) return null

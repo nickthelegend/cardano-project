@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const EnergyContainer = styled.div`
   position: fixed;
@@ -92,7 +92,7 @@ interface EnergySystemProps {
 }
 
 export function EnergySystem({ onEnergyChange }: EnergySystemProps) {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [energy, setEnergy] = useState(100) // Start with full energy
   const [lastRechargeTime, setLastRechargeTime] = useState(Date.now())
   const [showWarning, setShowWarning] = useState(false)

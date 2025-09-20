@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const LeaderboardContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
@@ -212,7 +212,7 @@ const mockLeaderboard: LeaderboardUser[] = [
 type LeaderboardTab = "scroll" | "vibe" | "total" | "streak"
 
 export function Leaderboard() {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [activeTab, setActiveTab] = useState<LeaderboardTab>("total")
   const [leaderboard] = useState<LeaderboardUser[]>(mockLeaderboard)
 

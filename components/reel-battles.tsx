@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const BattlesContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -221,7 +221,7 @@ interface Battle {
 }
 
 export function ReelBattles() {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [battles, setBattles] = useState<Battle[]>([])
   const [battleTitle, setBattleTitle] = useState("")
   const [entryFee, setEntryFee] = useState("")

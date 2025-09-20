@@ -1,7 +1,7 @@
 "use client"
 
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 import Link from "next/link"
 
 const SidebarContainer = styled.aside`
@@ -156,21 +156,25 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeView }: SidebarProps) {
-  const { user, logout } = useAuth()
+  const { user, disconnectWallet } = useUTXOSAuth()
 
   if (!user) return null
 
   return (
     <SidebarContainer>
       <UserProfile>
-        <Avatar>{user.username.charAt(0).toUpperCase()}</Avatar>
+        <Avatar>{user.walletAddress.charAt(0).toUpperCase()}</Avatar>
         <UserInfo>
           <Username>{user.username}</Username>
-          <UserHandle>@{user.username}</UserHandle>
+          <UserHandle>{user.walletAddress.slice(0, 8)}...{user.walletAddress.slice(-8)}</UserHandle>
         </UserInfo>
       </UserProfile>
 
       <TokenDisplay>
+        <TokenRow>
+          <TokenName>ADA</TokenName>
+          <TokenAmount>{user.adaBalance.toFixed(2)}</TokenAmount>
+        </TokenRow>
         <TokenRow>
           <TokenName>$Scroll</TokenName>
           <TokenAmount>{user.scrollTokens.toLocaleString()}</TokenAmount>
@@ -216,7 +220,7 @@ export function Sidebar({ activeView }: SidebarProps) {
         </NavList>
       </Navigation>
 
-      <LogoutButton onClick={logout}>Sign Out</LogoutButton>
+      <LogoutButton onClick={disconnectWallet}>Disconnect Wallet</LogoutButton>
     </SidebarContainer>
   )
 }

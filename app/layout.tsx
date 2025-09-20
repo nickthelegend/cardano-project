@@ -4,8 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import StyledComponentsRegistry from "@/lib/registry"
-import { AuthProvider } from "@/hooks/use-auth"
-import { AppShell } from "@/components/app-shell"
+import { UTXOSAuthProvider } from "@/hooks/use-utxos-auth"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,9 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <StyledComponentsRegistry>
           <ThemeProvider>
-            <AuthProvider>
-              <AppShell>{children}</AppShell>
-            </AuthProvider>
+            <UTXOSAuthProvider>{children}</UTXOSAuthProvider>
           </ThemeProvider>
         </StyledComponentsRegistry>
       </body>

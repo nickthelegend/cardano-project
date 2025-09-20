@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const ProfileContainer = styled.div`
   background: rgba(0, 0, 0, 0.4);
@@ -387,7 +387,7 @@ const mockAchievements: Achievement[] = [
 ]
 
 export function ProfileBadges() {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [activeTab, setActiveTab] = useState<BadgeCategory>("achievements")
   const [badges] = useState<Badge[]>(mockBadges)
   const [achievements] = useState<Achievement[]>(mockAchievements)

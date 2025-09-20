@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const ModalOverlay = styled.div<{ $show: boolean }>`
   position: fixed;
@@ -257,7 +257,7 @@ const vibeBoosts: BoostTier[] = [
 ]
 
 export function BoostModal({ show, onClose, reelId }: BoostModalProps) {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [selectedBoost, setSelectedBoost] = useState<string>("")
 
   if (!user) return null

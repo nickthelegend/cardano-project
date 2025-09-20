@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 import { useScrollRewards } from "@/hooks/use-scroll-rewards"
 import { ScrollProgress } from "./scroll-progress"
 import { BoostModal } from "./boost-modal"
@@ -269,7 +269,7 @@ const mockReels: Reel[] = [
 ]
 
 export function ReelFeed() {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const { earnTokens, showReward, rewardAmount, canEarn } = useScrollRewards()
   const [reels] = useState<Reel[]>(mockReels)
   const [currentReelIndex, setCurrentReelIndex] = useState(0)

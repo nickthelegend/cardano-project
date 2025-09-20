@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const QuestsContainer = styled.div`
   background: rgba(0, 0, 0, 0.4);
@@ -352,7 +352,7 @@ const mockQuests: Quest[] = [
 ]
 
 export function QuestsPanel() {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [activeTab, setActiveTab] = useState<QuestType>("daily")
   const [quests, setQuests] = useState<Quest[]>(mockQuests)
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const ModalOverlay = styled.div<{ $show: boolean }>`
   position: fixed;
@@ -233,7 +233,7 @@ const microTips = [
 const tipAmounts = [250, 500, 1000, 2500, 5000, 10000]
 
 export function TipModal({ show, onClose, creatorName, reelId }: TipModalProps) {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [selectedAmount, setSelectedAmount] = useState(0)
   const [customAmount, setCustomAmount] = useState("")
   const [tipType, setTipType] = useState<"micro" | "regular">("micro")

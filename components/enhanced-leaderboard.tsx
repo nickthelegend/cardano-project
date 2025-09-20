@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const LeaderboardContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -195,7 +195,7 @@ interface LeaderboardUser {
 }
 
 export function EnhancedLeaderboard() {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [activeTab, setActiveTab] = useState<LeaderboardType>("scrollers")
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>([])
 

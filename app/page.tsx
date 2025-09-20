@@ -1,12 +1,12 @@
 "use client"
 
-import { useAuth } from "@/hooks/use-auth"
-import { LoginForm } from "@/components/login-form"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { UTXOSLoginForm } from "@/components/utxos-login-form"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
 export default function RootPage() {
-  const { user, login, isLoading } = useAuth()
+  const { user, isLoading } = useUTXOSAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function RootPage() {
   }
 
   if (!user) {
-    return <LoginForm onLogin={login} />
+    return <UTXOSLoginForm />
   }
 
   return null

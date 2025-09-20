@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import styled from "styled-components"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const StakingContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
@@ -172,7 +172,7 @@ const stakingTiers = [
 ]
 
 export function StakingSystem() {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
   const [selectedTier, setSelectedTier] = useState(0)
 
   if (!user) return null

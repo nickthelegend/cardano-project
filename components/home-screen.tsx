@@ -3,7 +3,7 @@
 import styled from "styled-components"
 import { ScrollProgress } from "./scroll-progress"
 import { ReelFeed } from "./reel-feed"
-import { useAuth } from "@/hooks/use-auth"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 const HomeContainer = styled.div`
   display: flex;
@@ -82,7 +82,7 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ canScroll = true }: HomeScreenProps) {
-  const { user } = useAuth()
+  const { user } = useUTXOSAuth()
 
   if (!user) return null
 
