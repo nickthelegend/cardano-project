@@ -114,17 +114,7 @@ export function HomeScreen({ canScroll = true }: HomeScreenProps) {
         </QuickStats>
       </WelcomeSection>
 
-      <ContentSection>
-        <div>
-          <SectionTitle>Daily Progress</SectionTitle>
-          <ScrollProgress />
-        </div>
-
-        <div>
-          <SectionTitle>Latest Reels</SectionTitle>
-          <ReelFeed canScroll={canScroll} />
-        </div>
-      </ContentSection>
+      
     </HomeContainer>
   )
 }

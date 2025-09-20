@@ -1,4 +1,4 @@
-# Algorand Fantasy League Project Guide
+# ScrollVibe - Scroll to Earn Project Guide
 
 ## Project Overview
 **Name**: ScrollVibe - Scroll to Earn  
@@ -18,27 +18,38 @@
 ### Core Directories
 ```
 app/                    # Next.js App Router pages
-├── arena/             # Arena/tournament pages
+├── home/              # Home dashboard page
+├── reel/              # Reel feed page
+├── wallet/            # Token wallet page
+├── leaderboard/       # Leaderboard page
+├── challenges/        # Daily challenges page
 ├── auth/              # Authentication callback
-├── profile/           # User profile
-├── tournament/        # Tournament management
-└── page.tsx           # Main entry point
+├── profile/           # User profile page
+├── layout.tsx         # Root layout with AppShell
+└── page.tsx           # Root page (login/redirect)
 
 components/            # React components
-├── ui/               # shadcn/ui components
-├── main-app.tsx      # Main application shell
+├── ui/               # shadcn/ui components (40+ components)
+├── app-shell.tsx     # Main application shell & navigation
+├── home-screen.tsx   # Home dashboard component
 ├── reel-feed.tsx     # Core scrolling feed
 ├── sidebar.tsx       # Desktop navigation
-└── bottom-navigation.tsx # Mobile navigation
+├── bottom-navigation.tsx # Mobile navigation
+├── energy-system.tsx # Energy/scroll mechanics
+├── token-wallet.tsx  # Token management
+├── daily-challenges.tsx # Challenge system
+└── [other components] # Various UI components
 
 hooks/                # Custom React hooks
 ├── use-auth.tsx      # Authentication logic
 ├── use-energy-system.tsx # Energy/scroll mechanics
+├── use-energy.ts     # Energy state management
 └── use-mobile.ts     # Mobile detection
 
 lib/                  # Utilities and configurations
 ├── supabase.ts       # Database client
 ├── theme.ts          # Styled components theme
+├── crypto-api.ts     # Mock crypto data API
 └── utils.ts          # Utility functions
 ```
 
@@ -56,11 +67,21 @@ lib/                  # Utilities and configurations
 - **Layout**: Responsive (sidebar on desktop, bottom nav on mobile)
 - **State**: Local state for active view and scroll permissions
 
-### Core Mechanics
-1. **Energy System**: Controls scroll permissions
-2. **Token System**: ScrollTokens + VibeTokens
-3. **Reel Feed**: Main content consumption area
-4. **Challenges**: Daily tasks and quests
+### Core Features & Components
+
+#### Application Architecture
+- **Routes**: /home, /reel, /wallet, /leaderboard, /challenges
+- **Layout**: AppShell component handles navigation and layout
+- **Navigation**: Responsive (sidebar on desktop, bottom nav on mobile)
+- **State**: Route-based navigation with persistent energy system
+
+#### Core Mechanics
+1. **Energy System**: Controls scroll permissions and token earning
+2. **Token System**: ScrollTokens + VibeTokens with conversion
+3. **Reel Feed**: Main content consumption area with scroll rewards
+4. **Challenges**: Daily tasks, quests, and battles
+5. **Leaderboard**: User rankings and competitions
+6. **Profile System**: User stats, badges, and achievements
 
 ### Styling Architecture
 - **Global**: Tailwind CSS v4 with custom CSS variables
@@ -106,10 +127,12 @@ npm run start  # Production server
 ## Important Notes
 
 ### Current Implementation Status
-- **Auth**: Mock implementation (not connected to Supabase)
+- **Auth**: Mock implementation using localStorage (Supabase configured but not used)
 - **Data**: All data is mock/local storage based
-- **API**: No real backend integration yet
-- **Tokens**: Simulated token earning system
+- **API**: Mock crypto API for token data
+- **Tokens**: Simulated token earning system with energy mechanics
+- **UI**: Fully functional with responsive design
+- **Navigation**: Complete mobile/desktop navigation systems
 
 ### Mobile Responsiveness
 - Uses `useIsMobile` hook for detection
@@ -122,12 +145,48 @@ npm run start  # Production server
 - Dark mode as primary design
 - Custom scrollbar styling
 
+## Key Components Overview
+
+### Essential Components
+- `app-shell.tsx` - Application shell and navigation wrapper
+- `home-screen.tsx` - Dashboard with user stats and welcome
+- `reel-feed.tsx` - Core scrolling interface
+- `energy-system.tsx` - Energy mechanics and token earning
+- `token-wallet.tsx` - Token management and conversion
+- `sidebar.tsx` / `bottom-navigation.tsx` - Navigation systems
+- `login-form.tsx` - Authentication interface
+
+### Feature Components
+- `daily-challenges.tsx` - Challenge system
+- `enhanced-leaderboard.tsx` - User rankings
+- `reel-battles.tsx` - Battle system
+- `quests-panel.tsx` - Quest management
+- `profile-badges.tsx` - User achievements
+
 ## Future Development Areas
-1. **Backend Integration**: Connect Supabase auth and data
-2. **Real Token System**: Implement actual cryptocurrency integration
-3. **Content Management**: Real reel/content system
-4. **Social Features**: User interactions, following, etc.
-5. **Performance**: Optimize for mobile scrolling performance
+1. **Backend Integration**: Connect Supabase auth and real data
+2. **Real Token System**: Implement actual cryptocurrency/blockchain integration
+3. **Content Management**: Real reel/content system with user uploads
+4. **Social Features**: User interactions, following, comments
+5. **Performance**: Optimize for mobile scrolling and real-time updates
+
+## Route Structure
+
+### Available Routes
+- `/` - Root page (login or redirect to /home)
+- `/home` - Dashboard with user stats and overview
+- `/reel` - Main scrolling feed for earning tokens
+- `/wallet` - Token management and conversion
+- `/leaderboard` - User rankings and competitions
+- `/challenges` - Daily tasks and challenges
+- `/auth/callback` - Authentication callback
+- `/profile` - User profile management
+
+### Navigation Flow
+1. **Unauthenticated**: Shows login form on root page
+2. **Authenticated**: Redirects to /home, navigation available
+3. **Mobile**: Bottom navigation with 5 main routes
+4. **Desktop**: Sidebar navigation with all routes
 
 ## Quick Reference Commands
 ```bash

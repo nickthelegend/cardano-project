@@ -2,6 +2,7 @@
 
 import styled from "styled-components"
 import { useAuth } from "@/hooks/use-auth"
+import Link from "next/link"
 
 const SidebarContainer = styled.aside`
   position: fixed;
@@ -75,7 +76,7 @@ const NavItem = styled.li<{ $active?: boolean }>`
   margin-bottom: ${({ theme }) => theme.spacing.sm};
 `
 
-const NavLink = styled.button<{ $active?: boolean }>`
+const NavLink = styled(Link)<{ $active?: boolean }>`
   width: 100%;
   display: flex;
   align-items: center;
@@ -84,7 +85,7 @@ const NavLink = styled.button<{ $active?: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius.md};
   background: ${({ $active, theme }) => ($active ? "rgba(99, 219, 154, 0.4)" : "transparent")};
   color: ${({ $active, theme }) => ($active ? "#ffffff" : "#cccccc")};
-  border: none;
+  text-decoration: none;
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 500;
@@ -151,11 +152,10 @@ const LogoutButton = styled.button`
 `
 
 interface SidebarProps {
-  activeView: "home" | "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile"
-  onViewChange: (view: "home" | "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile") => void
+  activeView: string
 }
 
-export function Sidebar({ activeView, onViewChange }: SidebarProps) {
+export function Sidebar({ activeView }: SidebarProps) {
   const { user, logout } = useAuth()
 
   if (!user) return null
@@ -184,51 +184,33 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
       <Navigation>
         <NavList>
           <NavItem>
-            <NavLink $active={activeView === "home"} onClick={() => onViewChange("home")}>
+            <NavLink href="/home" $active={activeView === "home"}>
               <NavIcon>🏠</NavIcon>
               Home
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink $active={activeView === "feed"} onClick={() => onViewChange("feed")}>
+            <NavLink href="/reel" $active={activeView === "reel"}>
               <NavIcon>🎬</NavIcon>
               Reel Feed
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink $active={activeView === "wallet"} onClick={() => onViewChange("wallet")}>
+            <NavLink href="/wallet" $active={activeView === "wallet"}>
               <NavIcon>💰</NavIcon>
               Token Wallet
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink $active={activeView === "leaderboard"} onClick={() => onViewChange("leaderboard")}>
+            <NavLink href="/leaderboard" $active={activeView === "leaderboard"}>
               <NavIcon>🏆</NavIcon>
               Leaderboard
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink $active={activeView === "challenges"} onClick={() => onViewChange("challenges")}>
+            <NavLink href="/challenges" $active={activeView === "challenges"}>
               <NavIcon>🎯</NavIcon>
               Daily Challenges
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink $active={activeView === "quests"} onClick={() => onViewChange("quests")}>
-              <NavIcon>🗡️</NavIcon>
-              Quests
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink $active={activeView === "battles"} onClick={() => onViewChange("battles")}>
-              <NavIcon>⚔️</NavIcon>
-              Reel Battles
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink $active={activeView === "profile"} onClick={() => onViewChange("profile")}>
-              <NavIcon>👤</NavIcon>
-              Profile
             </NavLink>
           </NavItem>
         </NavList>

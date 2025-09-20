@@ -2,10 +2,18 @@
 
 import { useAuth } from "@/hooks/use-auth"
 import { LoginForm } from "@/components/login-form"
-import { MainApp } from "@/components/main-app"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
-export default function HomePage() {
+export default function RootPage() {
   const { user, login, isLoading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (user) {
+      router.push("/home")
+    }
+  }, [user, router])
 
   if (isLoading) {
     return (
@@ -28,5 +36,5 @@ export default function HomePage() {
     return <LoginForm onLogin={login} />
   }
 
-  return <MainApp />
+  return null
 }

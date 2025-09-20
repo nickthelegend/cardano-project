@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import StyledComponentsRegistry from "@/lib/registry"
 import { AuthProvider } from "@/hooks/use-auth"
+import { AppShell } from "@/components/app-shell"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,7 +25,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <StyledComponentsRegistry>
           <ThemeProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <AppShell>{children}</AppShell>
+            </AuthProvider>
           </ThemeProvider>
         </StyledComponentsRegistry>
       </body>
