@@ -10,6 +10,13 @@ const HomeContainer = styled.div`
   flex-direction: column;
   height: 100%;
   gap: ${({ theme }) => theme.spacing.lg};
+  padding: 0 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    padding: 0 0.5rem;
+  }
 `
 
 const WelcomeSection = styled.div`

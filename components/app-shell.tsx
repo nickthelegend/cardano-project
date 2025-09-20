@@ -17,12 +17,18 @@ const AppContainer = styled.div`
   color: ${({ theme }) => theme.colors.text};
 `
 
-const MainContent = styled.main<{ $isMobile: boolean; $hasAuth: boolean }>`
+const MainContent = styled.main<{ $isMobile: boolean; $hasAuth: boolean; $showProgress: boolean }>`
   flex: 1;
   display: flex;
   flex-direction: column;
   margin-left: ${({ $isMobile, $hasAuth }) => ($isMobile || !$hasAuth ? '0' : '280px')};
+  padding-top: ${({ $showProgress }) => ($showProgress ? '90px' : '0')};
   padding-bottom: ${({ $isMobile, $hasAuth }) => ($isMobile && $hasAuth ? '80px' : '0')};
+  
+  @media (max-width: 768px) {
+    padding-top: ${({ $showProgress }) => ($showProgress ? '80px' : '0')};
+    margin-left: 0;
+  }
 `
 
 const ContentArea = styled.div`
@@ -51,19 +57,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <AppContainer>
       {showNavigation && !isMobile && <Sidebar activeView={getActiveView()} />}
-      <MainContent $isMobile={isMobile} $hasAuth={!!user}>
+      <MainContent $isMobile={isMobile} $hasAuth={!!user} $showProgress={showNavigation}>
         <ContentArea>
           {children}
         </ContentArea>
       </MainContent>
 
       {showNavigation && isMobile && <BottomNavigation activeView={getActiveView()} />}
-      {showNavigation && (
-        <>
-          {/* <EnergyBar /> */}
-          {pathname === "/home" && <ScrollProgress />}
-        </>
-      )}
+      {showNavigation && <ScrollProgress />}
     </AppContainer>
   )
 }
