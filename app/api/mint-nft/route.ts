@@ -13,7 +13,20 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-
+    const universalStaticUtxo = {
+      input: {
+        outputIndex: 0,
+        txHash: "5a1edf7da58eff2059030abd456947a96cb2d16b9d8c3822ffff58d167ed8bfc",
+      },
+      output: {
+        address:
+          "addr_test1qrsj3xj6q99m4g9tu9mm2lzzdafy04035eya7hjhpus55r204nlu6dmhgpruq7df228h9gpujt0mtnfcnkcaj3wj457q5zv6kz",
+        amount: [{ unit: "lovelace", quantity: "5000000" }],
+      },
+    };
+     
+    const universalStaticChangeAddress =
+      "addr_test1qrsj3xj6q99m4g9tu9mm2lzzdafy04035eya7hjhpus55r204nlu6dmhgpruq7df228h9gpujt0mtnfcnkcaj3wj457q5zv6kz";
     const provider = new BlockfrostProvider(`/api/blockfrost/preprod/`)
     
     const sdk = new Web3Sdk({
@@ -23,6 +36,8 @@ export async function POST(request: NextRequest) {
       privateKey: process.env.UTXOS_PRIVATE_KEY!,
       fetcher: provider,
       submitter: provider,
+      staticUtxo: universalStaticUtxo, // Use the static UTXO
+
     })
 
     const txBuilder = new MeshTxBuilder({
@@ -44,6 +59,7 @@ export async function POST(request: NextRequest) {
     const metadata = { [policyId]: { [tokenName]: { ...demoAssetMetadata } } }
 
     const staticInfo = sdk.sponsorship.getStaticInfo()
+    console.log("NFT transaction prepared successfully", staticInfo)
 
     txBuilder
       .mint("1", policyId, tokenNameHex)
