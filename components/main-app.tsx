@@ -2,6 +2,7 @@
 
 import styled from "styled-components"
 import { Sidebar } from "./sidebar"
+import { BottomNavigation } from "./bottom-navigation"
 import { ReelFeed } from "./reel-feed"
 import { TokenWallet } from "./token-wallet"
 import { EnhancedLeaderboard } from "./enhanced-leaderboard"
@@ -13,6 +14,7 @@ import { EnergyBar } from "./energy-bar" // Added energy bar import
 import { ScrollProgress } from "./scroll-progress"
 import { useState } from "react"
 import { ProfileBadges } from "./profile-badges"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 const AppContainer = styled.div`
   display: flex;
@@ -21,15 +23,12 @@ const AppContainer = styled.div`
   color: ${({ theme }) => theme.colors.text};
 `
 
-const MainContent = styled.main`
+const MainContent = styled.main<{ $isMobile: boolean }>`
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-left: 280px;
-  
-  @media (max-width: 768px) {
-    margin-left: 0;
-  }
+  margin-left: ${({ $isMobile }) => ($isMobile ? '0' : '280px')};
+  padding-bottom: ${({ $isMobile }) => ($isMobile ? '80px' : '0')};
 `
 
 const ContentArea = styled.div`
@@ -43,6 +42,7 @@ export function MainApp() {
     "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile"
   >("feed")
   const [canScroll, setCanScroll] = useState(true)
+  const isMobile = useIsMobile()
 
   const handleEnergyChange = (energy: number, canScrollNow: boolean) => {
     setCanScroll(canScrollNow)
@@ -50,8 +50,8 @@ export function MainApp() {
 
   return (
     <AppContainer>
-      <Sidebar activeView={activeView} onViewChange={setActiveView} />
-      <MainContent>
+      {!isMobile && <Sidebar activeView={activeView} onViewChange={setActiveView} />}
+      <MainContent $isMobile={isMobile}>
         <ContentArea>
           {activeView === "feed" && <ReelFeed canScroll={canScroll} />}
           {activeView === "wallet" && <TokenWallet />}
@@ -63,6 +63,7 @@ export function MainApp() {
         </ContentArea>
       </MainContent>
 
+      {isMobile && <BottomNavigation activeView={activeView} onViewChange={setActiveView} />}
       <EnergyBar />
       <EnergySystem onEnergyChange={handleEnergyChange} />
       <ScrollProgress />

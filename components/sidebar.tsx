@@ -18,13 +18,7 @@ const SidebarContainer = styled.aside`
   z-index: 100;
   
   @media (max-width: 768px) {
-    width: 100%;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    
-    &.open {
-      transform: translateX(0);
-    }
+    display: none;
   }
 `
 

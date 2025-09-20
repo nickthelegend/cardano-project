@@ -1,33 +1,32 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Home, Users, Trophy, User, Gamepad2 } from 'lucide-react'
+import { Home, Video, Target, Wallet } from 'lucide-react'
 
 interface BottomNavigationProps {
-  activeScreen: string
-  onScreenChange: (screen: string) => void
+  activeView: "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile"
+  onViewChange: (view: "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile") => void
 }
 
-export function BottomNavigation({ activeScreen, onScreenChange }: BottomNavigationProps) {
+export function BottomNavigation({ activeView, onViewChange }: BottomNavigationProps) {
   const navItems = [
-    { id: "tournament", icon: Home, label: "Home" },
-    { id: "team", icon: Gamepad2, label: "Team" },
-    { id: "matches", icon: Users, label: "Matches" },
-    { id: "leaderboard", icon: Trophy, label: "Leaderboard" },
-    { id: "profile", icon: User, label: "Profile" }
+    { id: "feed", icon: Home, label: "Home" },
+    { id: "feed", icon: Video, label: "Reel Feed" },
+    { id: "challenges", icon: Target, label: "Challenges" },
+    { id: "wallet", icon: Wallet, label: "Wallet" }
   ]
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-gray-700/50">
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-gray-700/50 z-50">
       <div className="flex items-center justify-around py-3">
-        {navItems.map((item) => {
+        {navItems.map((item, index) => {
           const Icon = item.icon
-          const isActive = activeScreen === item.id
+          const isActive = activeView === item.id
           
           return (
             <motion.button
-              key={item.id}
-              onClick={() => onScreenChange(item.id)}
+              key={`${item.id}-${index}`}
+              onClick={() => onViewChange(item.id)}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
                 isActive ? "text-emerald-400" : "text-gray-400"
               }`}
