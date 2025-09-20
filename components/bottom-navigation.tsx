@@ -4,13 +4,13 @@ import { motion } from "framer-motion"
 import { Home, Video, Target, Wallet } from 'lucide-react'
 
 interface BottomNavigationProps {
-  activeView: "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile"
-  onViewChange: (view: "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile") => void
+  activeView: "home" | "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile"
+  onViewChange: (view: "home" | "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile") => void
 }
 
 export function BottomNavigation({ activeView, onViewChange }: BottomNavigationProps) {
   const navItems = [
-    { id: "feed", icon: Home, label: "Home" },
+    { id: "home", icon: Home, label: "Home" },
     { id: "feed", icon: Video, label: "Reel Feed" },
     { id: "challenges", icon: Target, label: "Challenges" },
     { id: "wallet", icon: Wallet, label: "Wallet" }

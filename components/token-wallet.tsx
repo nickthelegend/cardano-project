@@ -394,8 +394,6 @@ export function TokenWallet() {
       <TokenConversion />
       <StakingSystem />
       <GovernanceDAO />
-      <DailyChallenges />
-      <Leaderboard />
 
       <StatsSection>
         <StatsTitle>Earning Statistics</StatsTitle>

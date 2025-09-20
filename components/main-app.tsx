@@ -3,6 +3,7 @@
 import styled from "styled-components"
 import { Sidebar } from "./sidebar"
 import { BottomNavigation } from "./bottom-navigation"
+import { HomeScreen } from "./home-screen"
 import { ReelFeed } from "./reel-feed"
 import { TokenWallet } from "./token-wallet"
 import { EnhancedLeaderboard } from "./enhanced-leaderboard"
@@ -39,8 +40,8 @@ const ContentArea = styled.div`
 
 export function MainApp() {
   const [activeView, setActiveView] = useState<
-    "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile"
-  >("feed")
+    "home" | "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile"
+  >("home")
   const [canScroll, setCanScroll] = useState(true)
   const isMobile = useIsMobile()
 
@@ -53,7 +54,8 @@ export function MainApp() {
       {!isMobile && <Sidebar activeView={activeView} onViewChange={setActiveView} />}
       <MainContent $isMobile={isMobile}>
         <ContentArea>
-          {activeView === "feed" && <ReelFeed canScroll={canScroll} />}
+          {activeView === "home" && <HomeScreen />}
+          {activeView === "feed" && <ReelFeed />}
           {activeView === "wallet" && <TokenWallet />}
           {activeView === "leaderboard" && <EnhancedLeaderboard />}
           {activeView === "challenges" && <DailyChallenges />}
@@ -66,7 +68,6 @@ export function MainApp() {
       {isMobile && <BottomNavigation activeView={activeView} onViewChange={setActiveView} />}
       <EnergyBar />
       <EnergySystem onEnergyChange={handleEnergyChange} />
-      <ScrollProgress />
     </AppContainer>
   )
 }

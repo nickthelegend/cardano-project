@@ -12,7 +12,7 @@ const SidebarContainer = styled.aside`
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(20px);
   border-right: 1px solid ${({ theme }) => theme.colors.border};
-  padding: ${({ theme }) => theme.spacing.lg};
+  padding: ${({ theme }) => theme.spacing.xl};
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -151,8 +151,8 @@ const LogoutButton = styled.button`
 `
 
 interface SidebarProps {
-  activeView: "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile"
-  onViewChange: (view: "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile") => void
+  activeView: "home" | "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile"
+  onViewChange: (view: "home" | "feed" | "wallet" | "leaderboard" | "challenges" | "battles" | "quests" | "profile") => void
 }
 
 export function Sidebar({ activeView, onViewChange }: SidebarProps) {
@@ -183,6 +183,12 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
 
       <Navigation>
         <NavList>
+          <NavItem>
+            <NavLink $active={activeView === "home"} onClick={() => onViewChange("home")}>
+              <NavIcon>🏠</NavIcon>
+              Home
+            </NavLink>
+          </NavItem>
           <NavItem>
             <NavLink $active={activeView === "feed"} onClick={() => onViewChange("feed")}>
               <NavIcon>🎬</NavIcon>
