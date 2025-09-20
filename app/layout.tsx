@@ -6,6 +6,10 @@ import { ThemeProvider } from "@/components/theme-provider"
 import StyledComponentsRegistry from "@/lib/registry"
 import { UTXOSAuthProvider } from "@/hooks/use-utxos-auth"
 import { AppShell } from "@/components/app-shell"
+import { DonationModalProvider } from "@/hooks/use-donation-modal"
+import { DonationModal } from "@/components/donation-modal"
+import { WalletProvider } from "@/hooks/use-wallet"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,7 +30,13 @@ export default function RootLayout({
         <StyledComponentsRegistry>
           <ThemeProvider>
             <UTXOSAuthProvider>
-              <AppShell>{children}</AppShell>
+              <WalletProvider>
+                <DonationModalProvider>
+                  <AppShell>{children}</AppShell>
+                  <DonationModal />
+                  <Toaster />
+                </DonationModalProvider>
+              </WalletProvider>
             </UTXOSAuthProvider>
           </ThemeProvider>
         </StyledComponentsRegistry>

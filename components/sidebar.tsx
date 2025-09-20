@@ -2,8 +2,11 @@
 
 import styled from "styled-components"
 import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useDonationModal } from "@/hooks/use-donation-modal"
+import { useWallet } from "@/hooks/use-wallet"
 import Link from "next/link"
-import { Copy } from "lucide-react"
+import { Copy, Gift } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 const SidebarContainer = styled.aside`
   position: fixed;
@@ -164,6 +167,8 @@ interface SidebarProps {
 
 export function Sidebar({ activeView }: SidebarProps) {
   const { user, disconnectWallet } = useUTXOSAuth()
+  const { open } = useDonationModal()
+  const { connect, disconnect, isConnected, walletAddress } = useWallet()
 
   const copyToClipboard = async () => {
     if (user?.walletAddress) {
@@ -224,10 +229,33 @@ export function Sidebar({ activeView }: SidebarProps) {
               Daily Challenges
             </NavLink>
           </NavItem>
+          <NavItem>
+            <Button 
+              onClick={open}
+              className="w-full justify-start gap-3 bg-purple-600 hover:bg-purple-700 text-white"
+              variant="default"
+            >
+              <Gift className="w-5 h-5" />
+              Support Us
+            </Button>
+          </NavItem>
         </NavList>
       </Navigation>
 
-      <LogoutButton onClick={disconnectWallet}>Disconnect Wallet</LogoutButton>
+      <div className="space-y-2">
+        {isConnected && walletAddress ? (
+          <div className="space-y-2">
+            <div className="text-xs text-gray-400">Eternl Wallet:</div>
+            <div className="flex items-center gap-2 text-sm font-mono bg-gray-800 p-2 rounded">
+              {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+              <Button variant="outline" size="sm" onClick={disconnect}>Disconnect</Button>
+            </div>
+          </div>
+        ) : (
+          <Button onClick={connect} className="w-full mb-2">Connect Eternl Wallet</Button>
+        )}
+        <LogoutButton onClick={disconnectWallet}>Disconnect UTXOS</LogoutButton>
+      </div>
     </SidebarContainer>
   )
 }

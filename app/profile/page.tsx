@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Header } from "@/components/header"
 import { ProfileStats } from "@/components/profile-stats"
-import { RecentMatches } from "@/components/recent-matches"
+
 import { Button } from "@/components/ui/button"
 import { Settings, Edit, Share, Trophy, TrendingUp } from 'lucide-react'
 import { supabase } from "@/lib/supabase"
@@ -214,7 +214,6 @@ export default function ProfilePage() {
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
               <ProfileStats />
-              <RecentMatches />
             </div>
             
             {/* Sidebar */}

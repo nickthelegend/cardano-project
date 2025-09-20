@@ -1,14 +1,17 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Home, Video, Target, Wallet, Trophy } from 'lucide-react'
+import { Home, Video, Target, Wallet, Trophy, Gift } from 'lucide-react'
 import Link from "next/link"
+import { useDonationModal } from "@/hooks/use-donation-modal"
 
 interface BottomNavigationProps {
   activeView: string
 }
 
 export function BottomNavigation({ activeView }: BottomNavigationProps) {
+  const { open } = useDonationModal()
+  
   const navItems = [
     { id: "home", icon: Home, label: "Home", href: "/home" },
     { id: "reel", icon: Video, label: "Reels", href: "/reel" },
@@ -54,6 +57,18 @@ export function BottomNavigation({ activeView }: BottomNavigationProps) {
             </Link>
           )
         })}
+        <button
+          onClick={open}
+          className="flex flex-col items-center gap-1 p-2 rounded-lg transition-colors text-gray-400 hover:text-emerald-400"
+        >
+          <motion.div
+            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.05 }}
+          >
+            <Gift className="w-5 h-5" />
+          </motion.div>
+          <span className="text-xs">Donate</span>
+        </button>
       </div>
     </div>
   )
