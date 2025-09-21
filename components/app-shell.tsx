@@ -6,9 +6,11 @@ import { BottomNavigation } from "./bottom-navigation"
 import { EnergySystem } from "./energy-system"
 import { EnergyBar } from "./energy-bar"
 import { ScrollProgress } from "./scroll-progress"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { useWalletMigration } from "@/lib/wallet-migration"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 
 const AppContainer = styled.div`
   display: flex;
@@ -32,12 +34,33 @@ const ContentArea = styled.div`
 `
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user } = useUTXOSAuth()
+  const { connected } = useWallet()
+  const { getUserData } = useWalletMigration()
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
+  const [isClient, setIsClient] = useState(false)
   const isMobile = useIsMobile()
   const pathname = usePathname()
 
-  // Don't show navigation on root page (login)
-  const showNavigation = user && pathname !== "/"
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
+
+  // Don't show navigation on root page (login) and don't render AppShell at all on root
+  const showNavigation = (connected || userData) && pathname !== "/"
+  const isRootPage = pathname === "/"
 
   const getActiveView = () => {
     if (pathname.startsWith("/home")) return "home"
@@ -48,10 +71,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return "home"
   }
 
+  // Don't render AppShell on root page to avoid interfering with wallet modal
+  if (isRootPage) {
+    return <>{children}</>
+  }
+
   return (
     <AppContainer>
       {showNavigation && !isMobile && <Sidebar activeView={getActiveView()} />}
-      <MainContent $isMobile={isMobile} $hasAuth={!!user}>
+      <MainContent $isMobile={isMobile} $hasAuth={!!userData}>
         <ContentArea>
           {children}
         </ContentArea>

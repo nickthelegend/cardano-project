@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { Button } from "@/components/ui/button"
 import { Upload, Video, Coins } from "lucide-react"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { useWalletMigration } from "@/lib/wallet-migration"
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -83,12 +84,38 @@ const TxHash = styled.div`
 `
 
 export default function CreateReelPage() {
-  const { user, wallet } = useUTXOSAuth()
+  const { connected, address, name, wallet } = useWallet()
+  const { getUserData } = useWalletMigration()
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
+
+  // Use migrated data or create default data for connected wallet
+  const user = userData || {
+    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+    walletAddress: address || "",
+  }
   
   console.log("CreateReelPage - User:", user)
   console.log("CreateReelPage - Wallet:", wallet)
   console.log("CreateReelPage - Wallet type:", typeof wallet)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [ipfsUrl, setIpfsUrl] = useState<string>("") 
@@ -116,8 +143,8 @@ export default function CreateReelPage() {
     console.log("Wallet exists:", !!wallet)
     console.log("Wallet type:", typeof wallet)
     
-    if (!selectedFile || !user) {
-      console.error("Missing requirements:", { selectedFile: !!selectedFile, user: !!user })
+    if (!selectedFile || (!connected && !userData)) {
+      console.error("Missing requirements:", { selectedFile: !!selectedFile, connected, userData: !!userData })
       return
     }
 
@@ -152,7 +179,7 @@ export default function CreateReelPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          receivingAddress: user.walletAddress,
+          receivingAddress: user?.walletAddress || address,
           ipfsUrl: uploadResult.url,
           fileName: selectedFile?.name || "Reel Video",
         }),
@@ -215,7 +242,7 @@ export default function CreateReelPage() {
       {selectedFile && (
         <Button 
           onClick={uploadAndMint} 
-          disabled={isProcessing || !user}
+          disabled={isProcessing || (!connected && !userData)}
           className="w-full"
         >
           <Coins className="mr-2" size={16} />

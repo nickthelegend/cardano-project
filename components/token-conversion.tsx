@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { useWalletMigration } from "@/lib/wallet-migration"
 
 const ConversionContainer = styled.div`
   background: rgba(0, 0, 0, 0.4);
@@ -128,10 +129,36 @@ const BreakdownRow = styled.div`
 `
 
 export function TokenConversion() {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
+  const { getUserData } = useWalletMigration()
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [scrollAmount, setScrollAmount] = useState("")
+  const [isClient, setIsClient] = useState(false)
 
-  if (!user) return null
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
+
+  if (!connected && !userData) return null
+
+  // Use migrated data or create default data for connected wallet
+  const user = userData || {
+    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+    scrollTokens: 0,
+  }
 
   const scrollValue = Number.parseFloat(scrollAmount) || 0
   const conversionRate = 1000 // 1000 $SCROLL = 1 $VIBE

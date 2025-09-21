@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { useWalletMigration } from "@/lib/wallet-migration"
 
 const LeaderboardContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
@@ -212,11 +213,36 @@ const mockLeaderboard: LeaderboardUser[] = [
 type LeaderboardTab = "scroll" | "vibe" | "total" | "streak"
 
 export function Leaderboard() {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
+  const { getUserData } = useWalletMigration()
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [activeTab, setActiveTab] = useState<LeaderboardTab>("total")
   const [leaderboard] = useState<LeaderboardUser[]>(mockLeaderboard)
+  const [isClient, setIsClient] = useState(false)
 
-  if (!user) return null
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
+
+  if (!connected && !userData) return null
+
+  // Use migrated data or create default data for connected wallet
+  const user = userData || {
+    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+  }
 
   const sortedLeaderboard = [...leaderboard].sort((a, b) => {
     switch (activeTab) {
@@ -270,7 +296,7 @@ export function Leaderboard() {
       <LeaderboardList>
         {sortedLeaderboard.map((leaderUser, index) => {
           const rank = index + 1
-          const isCurrentUser = leaderUser.name === user.email // Simplified check
+          const isCurrentUser = leaderUser.name === user.username // Simplified check
 
           return (
             <LeaderboardItem key={leaderUser.id} $rank={rank} $isCurrentUser={isCurrentUser}>

@@ -1,19 +1,19 @@
+"use client"
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import StyledComponentsRegistry from "@/lib/registry"
-import { UTXOSAuthProvider } from "@/hooks/use-utxos-auth"
-import { AppShell } from "@/components/app-shell"
+import { MeshProviderWrapper } from "@/components/mesh-provider-wrapper"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata: Metadata = {
-  title: "ScrollVibe - Scroll to Earn",
-  description: "Earn tokens by scrolling reels. The future of social media.",
-    generator: 'v0.app'
-}
+// export const metadata: Metadata = {
+//   title: "ScrollVibe - Scroll to Earn",
+//   description: "Earn tokens by scrolling reels. The future of social media.",
+//     generator: 'v0.app'
+// }
 
 export default function RootLayout({
   children,
@@ -25,9 +25,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <StyledComponentsRegistry>
           <ThemeProvider>
-            <UTXOSAuthProvider>
-              <AppShell>{children}</AppShell>
-            </UTXOSAuthProvider>
+            <MeshProviderWrapper>
+              {children}
+            </MeshProviderWrapper>
           </ThemeProvider>
         </StyledComponentsRegistry>
       </body>

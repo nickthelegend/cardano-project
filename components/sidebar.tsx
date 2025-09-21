@@ -1,9 +1,11 @@
 "use client"
 
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { useWalletMigration } from "@/lib/wallet-migration"
 import Link from "next/link"
 import { Copy } from "lucide-react"
+import { useEffect, useState } from "react"
 
 const SidebarContainer = styled.aside`
   position: fixed;
@@ -163,15 +165,53 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeView }: SidebarProps) {
-  const { user, disconnectWallet } = useUTXOSAuth()
+  const { connected, address, name, disconnect } = useWallet()
+  const { getUserData } = useWalletMigration()
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
 
   const copyToClipboard = async () => {
-    if (user?.walletAddress) {
-      await navigator.clipboard.writeText(user.walletAddress)
+    if (address) {
+      await navigator.clipboard.writeText(address)
     }
   }
 
-  if (!user) return null
+  const handleDisconnect = async () => {
+    try {
+      await disconnect()
+      setUserData(null)
+    } catch (error) {
+      console.error("Failed to disconnect:", error)
+    }
+  }
+
+  // Show sidebar if connected or has migrated data
+  if (!connected && !userData) return null
+
+  // Use migrated data or create default data for connected wallet
+  const user = userData || {
+    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+    address: address || "",
+  }
+
+  const displayAddress = address || user.address
 
   return (
     <SidebarContainer>
@@ -184,7 +224,7 @@ export function Sidebar({ activeView }: SidebarProps) {
         </ProfileHeader>
         <WalletSection>
           <WalletAddress>
-            {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
+            {displayAddress.slice(0, 6)}...{displayAddress.slice(-4)}
           </WalletAddress>
           <CopyButton onClick={copyToClipboard}>
             <Copy size={14} />
@@ -227,7 +267,7 @@ export function Sidebar({ activeView }: SidebarProps) {
         </NavList>
       </Navigation>
 
-      <LogoutButton onClick={disconnectWallet}>Disconnect Wallet</LogoutButton>
+      <LogoutButton onClick={handleDisconnect}>Disconnect Wallet</LogoutButton>
     </SidebarContainer>
   )
 }

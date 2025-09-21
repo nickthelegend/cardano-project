@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { useWalletMigration } from "@/lib/wallet-migration"
 
 const BattlesContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -221,10 +222,30 @@ interface Battle {
 }
 
 export function ReelBattles() {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
+  const { getUserData } = useWalletMigration()
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [battles, setBattles] = useState<Battle[]>([])
   const [battleTitle, setBattleTitle] = useState("")
   const [entryFee, setEntryFee] = useState("")
+  const [isClient, setIsClient] = useState(false)
+
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
 
   useEffect(() => {
     // Mock battle data
@@ -263,7 +284,7 @@ export function ReelBattles() {
   }, [])
 
   const handleCreateBattle = () => {
-    if (battleTitle && entryFee && user) {
+    if (battleTitle && entryFee && (connected || userData)) {
       console.log(`[v0] Creating battle: ${battleTitle} with entry fee: ${entryFee} $VIBE`)
       setBattleTitle("")
       setEntryFee("")

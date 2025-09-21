@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { useWalletMigration } from "@/lib/wallet-migration"
 
 const ModalOverlay = styled.div<{ $show: boolean }>`
   position: fixed;
@@ -233,12 +234,38 @@ const microTips = [
 const tipAmounts = [250, 500, 1000, 2500, 5000, 10000]
 
 export function TipModal({ show, onClose, creatorName, reelId }: TipModalProps) {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
+  const { getUserData } = useWalletMigration()
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [selectedAmount, setSelectedAmount] = useState(0)
   const [customAmount, setCustomAmount] = useState("")
   const [tipType, setTipType] = useState<"micro" | "regular">("micro")
+  const [isClient, setIsClient] = useState(false)
 
-  if (!user) return null
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
+
+  if (!connected && !userData) return null
+
+  // Use migrated data or create default data for connected wallet
+  const user = userData || {
+    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+    scrollTokens: 0,
+  }
 
   const tipAmount = customAmount ? Number.parseFloat(customAmount) : selectedAmount
   const platformFee = Math.ceil(tipAmount * 0.05) // 5% platform fee

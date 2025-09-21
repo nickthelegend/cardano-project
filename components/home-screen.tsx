@@ -3,7 +3,9 @@
 import styled from "styled-components"
 import { ScrollProgress } from "./scroll-progress"
 import { ReelFeed } from "./reel-feed"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { useWalletMigration } from "@/lib/wallet-migration"
+import { useEffect, useState } from "react"
 
 const HomeContainer = styled.div`
   display: flex;
@@ -82,9 +84,41 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ canScroll = true }: HomeScreenProps) {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
+  const { getUserData } = useWalletMigration()
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
+  const [isClient, setIsClient] = useState(false)
 
-  if (!user) return null
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
+
+  // If not connected and no migrated data, return null
+  if (!connected && !userData) return null
+
+  // Use migrated data or create default data for connected wallet
+  const user = userData || {
+    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+    scrollTokens: 0,
+    vibeTokens: 100,
+    dailyScrollCount: 0,
+    lastScrollReset: new Date().toISOString(),
+    adaBalance: 0,
+    isConnected: connected,
+  }
 
   return (
     <HomeContainer>
@@ -93,7 +127,7 @@ export function HomeScreen({ canScroll = true }: HomeScreenProps) {
         <WelcomeSubtitle>
           Ready to scroll and earn? Check your daily progress and dive into the latest reels!
         </WelcomeSubtitle>
-        
+
         <QuickStats>
           <StatCard>
             <StatValue>{user.scrollTokens.toLocaleString()}</StatValue>
@@ -114,7 +148,7 @@ export function HomeScreen({ canScroll = true }: HomeScreenProps) {
         </QuickStats>
       </WelcomeSection>
 
-      
+
     </HomeContainer>
   )
 }

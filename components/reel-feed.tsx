@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { useWalletMigration } from "@/lib/wallet-migration"
 import { useScrollRewards } from "@/hooks/use-scroll-rewards"
 import { ScrollProgress } from "./scroll-progress"
 import { BoostModal } from "./boost-modal"
@@ -269,8 +270,28 @@ const mockReels: Reel[] = [
 ]
 
 export function ReelFeed() {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
+  const { getUserData } = useWalletMigration()
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const { earnTokens, showReward, rewardAmount, canEarn } = useScrollRewards()
+  const [isClient, setIsClient] = useState(false)
+
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
   const [reels] = useState<Reel[]>(mockReels)
   const [currentReelIndex, setCurrentReelIndex] = useState(0)
   const [showBoostModal, setShowBoostModal] = useState(false)
@@ -279,6 +300,9 @@ export function ReelFeed() {
   const [selectedCreator, setSelectedCreator] = useState<string>("")
   const feedRef = useRef<HTMLDivElement>(null)
   const lastScrollTime = useRef(Date.now())
+
+  // Show feed if connected or has migrated data
+  if (!connected && !userData) return null
 
   useEffect(() => {
     const handleScroll = () => {

@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { useWalletMigration } from "@/lib/wallet-migration"
 
 const ChallengesContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
@@ -197,10 +198,30 @@ const mockChallenges: Challenge[] = [
 ]
 
 export function DailyChallenges() {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
+  const { getUserData } = useWalletMigration()
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [challenges, setChallenges] = useState<Challenge[]>(mockChallenges)
+  const [isClient, setIsClient] = useState(false)
 
-  if (!user) return null
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
+
+  if (!connected && !userData) return null
 
   const handleClaimReward = (challengeId: string) => {
     setChallenges((prev) =>

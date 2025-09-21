@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { useUTXOSAuth } from "./use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { useWalletMigration } from "@/lib/wallet-migration"
 import { useEnergySystem } from "./use-energy-system"
 
 interface ScrollReward {
@@ -25,7 +26,8 @@ const MIN_SCROLL_INTERVAL = 1500 // Minimum time between rewards (ms)
 const REWARD_RANGE = { min: 1, max: 8 } // Token reward range
 
 export function useScrollRewards(): UseScrollRewardsReturn {
-  const { user } = useUTXOSAuth()
+  const { connected } = useWallet()
+  const { getUserData } = useWalletMigration()
   const { canScroll, consumeEnergy } = useEnergySystem() // Added energy system integration
   const [showReward, setShowReward] = useState(false)
   const [rewardAmount, setRewardAmount] = useState(0)
