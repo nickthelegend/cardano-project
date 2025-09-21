@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+
 
 const LeaderboardContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -195,9 +196,29 @@ interface LeaderboardUser {
 }
 
 export function EnhancedLeaderboard() {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
+   
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [activeTab, setActiveTab] = useState<LeaderboardType>("scrollers")
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>([])
+  const [isClient, setIsClient] = useState(false)
+
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
 
   useEffect(() => {
     // Mock leaderboard data
@@ -206,34 +227,34 @@ export function EnhancedLeaderboard() {
         { id: "1", username: "ScrollMachine", score: 15420, rank: 1, stats: "15.4K reels scrolled" },
         { id: "2", username: "InfiniteScroller", score: 12890, rank: 2, stats: "12.9K reels scrolled" },
         { id: "3", username: "ReelAddict", score: 11250, rank: 3, stats: "11.3K reels scrolled" },
-        { id: "4", username: user?.username || "You", score: 8640, rank: 4, stats: "8.6K reels scrolled" },
+        { id: "4", username: (userData?.username || (name ? `User_${name.slice(0, 8)}` : "Wallet User")), score: 8640, rank: 4, stats: "8.6K reels scrolled" },
         { id: "5", username: "ScrollKing", score: 7320, rank: 5, stats: "7.3K reels scrolled" },
       ],
       creators: [
         { id: "1", username: "ContentQueen", score: 2450000, rank: 1, stats: "2.45M total views" },
         { id: "2", username: "ViralMaker", score: 1890000, rank: 2, stats: "1.89M total views" },
         { id: "3", username: "ReelCreator", score: 1560000, rank: 3, stats: "1.56M total views" },
-        { id: "4", username: user?.username || "You", score: 125000, rank: 4, stats: "125K total views" },
+        { id: "4", username: (userData?.username || (name ? `User_${name.slice(0, 8)}` : "Wallet User")), score: 125000, rank: 4, stats: "125K total views" },
         { id: "5", username: "TrendSetter", score: 98000, rank: 5, stats: "98K total views" },
       ],
       tippers: [
         { id: "1", username: "GenerousTipper", score: 45600, rank: 1, stats: "45.6K $SCROLL tipped" },
         { id: "2", username: "SupportMaster", score: 38200, rank: 2, stats: "38.2K $SCROLL tipped" },
         { id: "3", username: "CreatorSupporter", score: 29800, rank: 3, stats: "29.8K $SCROLL tipped" },
-        { id: "4", username: user?.username || "You", score: 12500, rank: 4, stats: "12.5K $SCROLL tipped" },
+        { id: "4", username: (userData?.username || (name ? `User_${name.slice(0, 8)}` : "Wallet User")), score: 12500, rank: 4, stats: "12.5K $SCROLL tipped" },
         { id: "5", username: "TipWarrior", score: 8900, rank: 5, stats: "8.9K $SCROLL tipped" },
       ],
       battles: [
         { id: "1", username: "BattleChamp", score: 28, rank: 1, stats: "28 battles won" },
         { id: "2", username: "ReelWarrior", score: 22, rank: 2, stats: "22 battles won" },
         { id: "3", username: "ContentKing", score: 18, rank: 3, stats: "18 battles won" },
-        { id: "4", username: user?.username || "You", score: 5, rank: 4, stats: "5 battles won" },
+        { id: "4", username: (userData?.username || (name ? `User_${name.slice(0, 8)}` : "Wallet User")), score: 5, rank: 4, stats: "5 battles won" },
         { id: "5", username: "VideoViper", score: 3, rank: 5, stats: "3 battles won" },
       ],
     }
 
     setLeaderboardData(mockData[activeTab])
-  }, [activeTab, user])
+  }, [activeTab, userData, name])
 
   const getTabLabel = (type: LeaderboardType) => {
     switch (type) {
@@ -265,7 +286,7 @@ export function EnhancedLeaderboard() {
 
       <LeaderboardList>
         {leaderboardData.map((item) => (
-          <LeaderboardItem key={item.id} $isCurrentUser={item.username === user?.username}>
+          <LeaderboardItem key={item.id} $isCurrentUser={item.username === (userData?.username || (name ? `User_${name.slice(0, 8)}` : "Wallet User"))}>
             <Rank $rank={item.rank}>#{item.rank}</Rank>
             <UserInfo>
               <Avatar>{item.username.charAt(0).toUpperCase()}</Avatar>

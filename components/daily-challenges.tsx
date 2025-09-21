@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+
 
 const ChallengesContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
@@ -197,10 +198,10 @@ const mockChallenges: Challenge[] = [
 ]
 
 export function DailyChallenges() {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
   const [challenges, setChallenges] = useState<Challenge[]>(mockChallenges)
 
-  if (!user) return null
+  if (!connected) return null
 
   const handleClaimReward = (challengeId: string) => {
     setChallenges((prev) =>

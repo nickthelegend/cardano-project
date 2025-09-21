@@ -3,10 +3,11 @@
 import styled from "styled-components"
 import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 import { useDonationModal } from "@/hooks/use-donation-modal"
-import { useWallet } from "@/hooks/use-wallet"
+import { useWallet } from "@meshsdk/react"
 import Link from "next/link"
 import { Copy, Gift } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
 
 const SidebarContainer = styled.aside`
   position: fixed;
@@ -98,6 +99,21 @@ const CopyButton = styled.button`
   }
 `
 
+const AdaBalance = styled.div`
+  font-size: 0.9rem;
+  color: ${({ theme }) => theme.colors.primary};
+  font-weight: 600;
+  margin-top: ${({ theme }) => theme.spacing.xs};
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xs};
+
+  &::before {
+    content: "₳";
+    font-size: 0.8rem;
+  }
+`
+
 const Navigation = styled.nav`
   flex: 1;
 `
@@ -168,33 +184,105 @@ interface SidebarProps {
 export function Sidebar({ activeView }: SidebarProps) {
   const { user, disconnectWallet } = useUTXOSAuth()
   const { open } = useDonationModal()
-  const { connect, disconnect, isConnected, walletAddress } = useWallet()
+  const { connected, address, name, disconnect, wallet, web3UserData } = useWallet()
+  const [isClient, setIsClient] = useState(false)
+  const [adaBalance, setAdaBalance] = useState<number | null>(null)
+
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Fetch ADA balance when wallet is connected
+  useEffect(() => {
+    async function fetchAdaBalance() {
+      if (connected && wallet) {
+        try {
+          const utxos = await wallet.getUtxos()
+          const totalLovelace = utxos.reduce((sum, utxo) => {
+            const lovelace = utxo.output.amount.find(
+              (asset) => asset.unit === "lovelace",
+            )
+            return sum + parseInt(lovelace?.quantity || "0")
+          }, 0)
+          setAdaBalance(totalLovelace / 1_000_000)
+        } catch (error) {
+          console.error("Failed to fetch ADA balance:", error)
+          setAdaBalance(null)
+        }
+      } else {
+        setAdaBalance(null)
+      }
+    }
+
+    fetchAdaBalance()
+  }, [connected, wallet])
 
   const copyToClipboard = async () => {
-    if (user?.walletAddress) {
-      await navigator.clipboard.writeText(user.walletAddress)
+    if (address) {
+      await navigator.clipboard.writeText(address)
     }
   }
 
-  if (!user) return null
+  const handleDisconnect = async () => {
+    try {
+      await disconnect()
+    } catch (error) {
+      console.error("Failed to disconnect:", error)
+    }
+  }
+
+  if (!connected) return null
+
+  const user = {
+    username: web3UserData?.username || name || "Wallet User",
+    email: web3UserData?.email,
+    avatar_url: web3UserData?.avatar_url,
+    address: address || "",
+  }
+
+  const displayAddress = address || user.address
 
   return (
     <SidebarContainer>
       <UserProfile>
         <ProfileHeader>
-          <Avatar>{user.username.charAt(0).toUpperCase()}</Avatar>
+          {user.avatar_url ? (
+            <img 
+              src={user.avatar_url} 
+              alt="Avatar" 
+              style={{ 
+                width: '48px', 
+                height: '48px', 
+                borderRadius: '50%', 
+                objectFit: 'cover' 
+              }} 
+            />
+          ) : (
+            <Avatar>{user.username.charAt(0).toUpperCase()}</Avatar>
+          )}
           <UserInfo>
             <Username>{user.username}</Username>
+            {user.email && (
+              <div style={{ fontSize: '0.8rem', color: '#cccccc', opacity: 0.8 }}>
+                {user.email}
+              </div>
+            )}
           </UserInfo>
         </ProfileHeader>
         <WalletSection>
           <WalletAddress>
-            {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
+            {displayAddress.slice(0, 6)}...{displayAddress.slice(-4)}
           </WalletAddress>
           <CopyButton onClick={copyToClipboard}>
             <Copy size={14} />
           </CopyButton>
         </WalletSection>
+        {adaBalance !== null && (
+          <AdaBalance>
+            {adaBalance.toFixed(2)} ADA
+          </AdaBalance>
+        )}
       </UserProfile>
 
       <Navigation>
@@ -242,20 +330,7 @@ export function Sidebar({ activeView }: SidebarProps) {
         </NavList>
       </Navigation>
 
-      <div className="space-y-2">
-        {isConnected && walletAddress ? (
-          <div className="space-y-2">
-            <div className="text-xs text-gray-400">Eternl Wallet:</div>
-            <div className="flex items-center gap-2 text-sm font-mono bg-gray-800 p-2 rounded">
-              {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-              <Button variant="outline" size="sm" onClick={disconnect}>Disconnect</Button>
-            </div>
-          </div>
-        ) : (
-          <Button onClick={connect} className="w-full mb-2">Connect Eternl Wallet</Button>
-        )}
-        <LogoutButton onClick={disconnectWallet}>Disconnect UTXOS</LogoutButton>
-      </div>
+      <LogoutButton onClick={handleDisconnect}>Disconnect Wallet</LogoutButton>
     </SidebarContainer>
   )
 }

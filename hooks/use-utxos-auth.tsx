@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { EnableWeb3WalletOptions, Web3Wallet } from "@meshsdk/web3-sdk"
-import { BlockfrostProvider } from "@meshsdk/provider"
+import { BlockfrostProvider } from "@meshsdk/core";
 
 interface User {
   id: string
@@ -34,10 +34,31 @@ export function UTXOSAuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Check for existing session
+    // Check for existing session and restore wallet
     const savedUser = localStorage.getItem("scrollvibe_utxos_user")
     if (savedUser) {
-      setUser(JSON.parse(savedUser))
+      const userData = JSON.parse(savedUser)
+      setUser(userData)
+      
+      // Restore wallet connection
+      const restoreWallet = async () => {
+        try {
+          const provider = new BlockfrostProvider(process.env.BLOCKFROST_API_KEY_PREPROD!);
+          const options: EnableWeb3WalletOptions = {
+            networkId: 0,
+            fetcher: provider,
+            submitter: provider,
+            projectId: process.env.NEXT_PUBLIC_UTXOS_PROJECT_ID,
+          }
+          const walletInstance = await Web3Wallet.enable(options)
+          setWallet(walletInstance)
+          console.log("Wallet restored successfully")
+        } catch (error) {
+          console.error("Failed to restore wallet:", error)
+        }
+      }
+      
+      restoreWallet()
     }
   }, [])
 
@@ -47,11 +68,11 @@ export function UTXOSAuthProvider({ children }: { children: ReactNode }) {
 
     try {
       // Initialize the blockchain data provider with secure api endpoint
-      const provider = new BlockfrostProvider(`/api/blockfrost/preprod/`)
+      const provider = new BlockfrostProvider(process.env.BLOCKFROST_API_KEY_PREPROD!);
 
       // Configure UTXOS wallet options
       const options: EnableWeb3WalletOptions = {
-        networkId: parseInt(process.env.NEXT_PUBLIC_NETWORK_ID || "0"), // 0: preprod, 1: mainnet
+        networkId: 0, // 0: preprod, 1: mainnet
         fetcher: provider,
         submitter: provider,
         projectId: process.env.NEXT_PUBLIC_UTXOS_PROJECT_ID,

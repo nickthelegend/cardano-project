@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+
 
 const ModalOverlay = styled.div<{ $show: boolean }>`
   position: fixed;
@@ -257,10 +258,16 @@ const vibeBoosts: BoostTier[] = [
 ]
 
 export function BoostModal({ show, onClose, reelId }: BoostModalProps) {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
   const [selectedBoost, setSelectedBoost] = useState<string>("")
 
-  if (!user) return null
+  if (!connected) return null
+
+  const user = {
+    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+    scrollTokens: 0,
+    vibeTokens: 100,
+  }
 
   const allBoosts = [...scrollBoosts, ...vibeBoosts]
   const selectedBoostTier = allBoosts.find((b) => b.id === selectedBoost)

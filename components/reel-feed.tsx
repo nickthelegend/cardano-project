@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+
 import { useScrollRewards } from "@/hooks/use-scroll-rewards"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 import { ScrollProgress } from "./scroll-progress"
 import { BoostModal } from "./boost-modal"
 import { TipModal } from "./tip-modal"
@@ -269,6 +271,7 @@ const mockReels: Reel[] = [
 ]
 
 export function ReelFeed() {
+  const { connected } = useWallet()
   const { user } = useUTXOSAuth()
   const { earnTokens, showReward, rewardAmount, canEarn } = useScrollRewards()
   const [reels] = useState<Reel[]>(mockReels)
@@ -279,6 +282,9 @@ export function ReelFeed() {
   const [selectedCreator, setSelectedCreator] = useState<string>("")
   const feedRef = useRef<HTMLDivElement>(null)
   const lastScrollTime = useRef(Date.now())
+
+  // Show feed if connected or has user data
+  if (!connected && !user) return null
 
   useEffect(() => {
     const handleScroll = () => {
@@ -344,7 +350,7 @@ export function ReelFeed() {
 
   return (
     <>
-      <ScrollProgress />
+      {/* <ScrollProgress /> */}
 
       <FeedContainer ref={feedRef}>
         {reels.map((reel, index) => (

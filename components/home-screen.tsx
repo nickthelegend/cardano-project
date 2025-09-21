@@ -3,13 +3,20 @@
 import styled from "styled-components"
 import { ScrollProgress } from "./scroll-progress"
 import { ReelFeed } from "./reel-feed"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+import { CreateReelModal } from "./create-reel-modal"
+import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
 
 const HomeContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
   gap: ${({ theme }) => theme.spacing.lg};
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 `
 
 const WelcomeSection = styled.div`
@@ -19,6 +26,7 @@ const WelcomeSection = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.xl};
   padding: ${({ theme }) => theme.spacing.xl};
   text-align: center;
+  width: 100%;
 `
 
 const WelcomeTitle = styled.h1`
@@ -82,9 +90,20 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ canScroll = true }: HomeScreenProps) {
-  const { user } = useUTXOSAuth()
+  const { connected, name , connect, wallet, setWallet} = useWallet()
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  
+  if (!connected) return null
 
-  if (!user) return null
+  const user = {
+    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+    scrollTokens: 0,
+    vibeTokens: 100,
+    dailyScrollCount: 0,
+    lastScrollReset: new Date().toISOString(),
+    adaBalance: 0,
+    isConnected: connected,
+  }
 
   return (
     <HomeContainer>
@@ -93,7 +112,7 @@ export function HomeScreen({ canScroll = true }: HomeScreenProps) {
         <WelcomeSubtitle>
           Ready to scroll and earn? Check your daily progress and dive into the latest reels!
         </WelcomeSubtitle>
-        
+
         <QuickStats>
           <StatCard>
             <StatValue>{user.scrollTokens.toLocaleString()}</StatValue>
@@ -112,9 +131,20 @@ export function HomeScreen({ canScroll = true }: HomeScreenProps) {
             <StatLabel>Day Streak</StatLabel>
           </StatCard>
         </QuickStats>
+        
+        <Button 
+          onClick={() => setShowCreateModal(true)}
+          style={{ marginTop: "1rem" }}
+        >
+          <Plus className="mr-2" size={16} />
+          Create Reel
+        </Button>
       </WelcomeSection>
 
-      
+      <CreateReelModal 
+        show={showCreateModal} 
+        onClose={() => setShowCreateModal(false)} 
+      />
     </HomeContainer>
   )
 }

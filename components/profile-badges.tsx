@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+
 
 const ProfileContainer = styled.div`
   background: rgba(0, 0, 0, 0.4);
@@ -387,12 +388,39 @@ const mockAchievements: Achievement[] = [
 ]
 
 export function ProfileBadges() {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
+   
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [activeTab, setActiveTab] = useState<BadgeCategory>("achievements")
   const [badges] = useState<Badge[]>(mockBadges)
   const [achievements] = useState<Achievement[]>(mockAchievements)
+  const [isClient, setIsClient] = useState(false)
 
-  if (!user) return null
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
+
+  if (!connected && !userData) return null
+
+  // Use migrated data or create default data for connected wallet
+  const user = userData || {
+    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+    scrollTokens: 0,
+    vibeTokens: 100,
+  }
 
   const filteredBadges = badges.filter((badge) => badge.category === activeTab)
   const earnedBadges = badges.filter((badge) => badge.earned)

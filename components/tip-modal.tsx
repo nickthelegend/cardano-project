@@ -1,8 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import styled from "styled-components"
+import { useWallet } from "@meshsdk/react"
 import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+
 
 const ModalOverlay = styled.div<{ $show: boolean }>`
   position: fixed;
@@ -233,19 +235,26 @@ const microTips = [
 const tipAmounts = [250, 500, 1000, 2500, 5000, 10000]
 
 export function TipModal({ show, onClose, creatorName, reelId }: TipModalProps) {
+  const { connected, name } = useWallet()
   const { user } = useUTXOSAuth()
   const [selectedAmount, setSelectedAmount] = useState(0)
   const [customAmount, setCustomAmount] = useState("")
   const [tipType, setTipType] = useState<"micro" | "regular">("micro")
 
-  if (!user) return null
+  if (!connected && !user) return null
+
+  // Use UTXOS user data or create default data for connected wallet
+  const userData = user || {
+    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+    scrollTokens: 0,
+  }
 
   const tipAmount = customAmount ? Number.parseFloat(customAmount) : selectedAmount
   const platformFee = Math.ceil(tipAmount * 0.05) // 5% platform fee
   const creatorReceives = tipAmount - platformFee
 
   const handleSendTip = () => {
-    if (tipAmount > 0 && tipAmount <= user.scrollTokens) {
+    if (tipAmount > 0 && tipAmount <= userData.scrollTokens) {
       console.log(`[v0] Sending ${tipAmount} $SCROLL tip to ${creatorName} for reel ${reelId}`)
       onClose()
     }
@@ -315,7 +324,7 @@ export function TipModal({ show, onClose, creatorName, reelId }: TipModalProps) 
             setCustomAmount(e.target.value)
             setSelectedAmount(0)
           }}
-          max={user.scrollTokens}
+          max={userData.scrollTokens}
         />
 
         {tipAmount > 0 && (
@@ -335,7 +344,7 @@ export function TipModal({ show, onClose, creatorName, reelId }: TipModalProps) 
           </TipSummary>
         )}
 
-        <SendTipButton onClick={handleSendTip} disabled={tipAmount <= 0 || tipAmount > user.scrollTokens}>
+        <SendTipButton onClick={handleSendTip} disabled={tipAmount <= 0 || tipAmount > userData.scrollTokens}>
           Send Tip
         </SendTipButton>
       </ModalContent>

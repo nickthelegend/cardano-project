@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import styled from "styled-components"
-import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
+import { useWallet } from "@meshsdk/react"
+
 
 const GovernanceContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
@@ -217,10 +218,37 @@ const mockProposals: Proposal[] = [
 ]
 
 export function GovernanceDAO() {
-  const { user } = useUTXOSAuth()
+  const { connected, name } = useWallet()
+   
+  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [proposals] = useState<Proposal[]>(mockProposals)
+  const [isClient, setIsClient] = useState(false)
 
-  if (!user) return null
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Update user data when wallet connection changes (only on client)
+  useEffect(() => {
+    if (isClient) {
+      if (connected) {
+        const data = getUserData()
+        setUserData(data)
+      } else {
+        setUserData(null)
+      }
+    }
+  }, [connected, getUserData, isClient])
+
+  if (!connected && !userData) return null
+
+  // Use migrated data or create default data for connected wallet
+  const user = userData || {
+    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+    vibeTokens: 100,
+    stakedVibe: 0,
+  }
 
   const votingPower = (user.stakedVibe || 0) + user.vibeTokens * 0.1
 
