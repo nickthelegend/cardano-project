@@ -2,7 +2,7 @@
 
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 import Link from "next/link"
 import { Copy } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -180,9 +180,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeView }: SidebarProps) {
-  const { connected, address, name, disconnect, wallet } = useWallet()
-  const { getUserData } = useWalletMigration()
-  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
+  const { connected, address, name, disconnect, wallet, web3UserData } = useWallet()
   const [isClient, setIsClient] = useState(false)
   const [adaBalance, setAdaBalance] = useState<number | null>(null)
 
@@ -191,17 +189,7 @@ export function Sidebar({ activeView }: SidebarProps) {
     setIsClient(true)
   }, [])
 
-  // Update user data when wallet connection changes (only on client)
-  useEffect(() => {
-    if (isClient) {
-      if (connected) {
-        const data = getUserData()
-        setUserData(data)
-      } else {
-        setUserData(null)
-      }
-    }
-  }, [connected, getUserData, isClient])
+
 
   // Fetch ADA balance when wallet is connected
   useEffect(() => {
@@ -237,18 +225,17 @@ export function Sidebar({ activeView }: SidebarProps) {
   const handleDisconnect = async () => {
     try {
       await disconnect()
-      setUserData(null)
     } catch (error) {
       console.error("Failed to disconnect:", error)
     }
   }
 
-  // Show sidebar if connected or has migrated data
-  if (!connected && !userData) return null
+  if (!connected) return null
 
-  // Use migrated data or create default data for connected wallet
-  const user = userData || {
-    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+  const user = {
+    username: web3UserData?.username || name || "Wallet User",
+    email: web3UserData?.email,
+    avatar_url: web3UserData?.avatar_url,
     address: address || "",
   }
 
@@ -258,9 +245,27 @@ export function Sidebar({ activeView }: SidebarProps) {
     <SidebarContainer>
       <UserProfile>
         <ProfileHeader>
-          <Avatar>{user.username.charAt(0).toUpperCase()}</Avatar>
+          {user.avatar_url ? (
+            <img 
+              src={user.avatar_url} 
+              alt="Avatar" 
+              style={{ 
+                width: '48px', 
+                height: '48px', 
+                borderRadius: '50%', 
+                objectFit: 'cover' 
+              }} 
+            />
+          ) : (
+            <Avatar>{user.username.charAt(0).toUpperCase()}</Avatar>
+          )}
           <UserInfo>
             <Username>{user.username}</Username>
+            {user.email && (
+              <div style={{ fontSize: '0.8rem', color: '#cccccc', opacity: 0.8 }}>
+                {user.email}
+              </div>
+            )}
           </UserInfo>
         </ProfileHeader>
         <WalletSection>

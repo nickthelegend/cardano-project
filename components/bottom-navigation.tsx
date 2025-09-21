@@ -18,8 +18,8 @@ export function BottomNavigation({ activeView }: BottomNavigationProps) {
   ]
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-gray-700/50 z-50">
-      <div className="flex items-center justify-around py-2 px-2">
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-gray-700/50 z-50 mobile-nav-safe-area">
+      <div className="flex items-center justify-around py-3 px-2">
         {navItems.map((item, index) => {
           const Icon = item.icon
           const isActive = activeView === item.id
@@ -39,10 +39,11 @@ export function BottomNavigation({ activeView }: BottomNavigationProps) {
                     color: isActive ? "#10b981" : "#9ca3af"
                   }}
                   transition={{ duration: 0.2 }}
+                  className="flex items-center justify-center w-8 h-8"
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-6 h-6" />
                 </motion.div>
-                <span className="text-xs">{item.label}</span>
+                <span className="text-xs font-medium">{item.label}</span>
                 {isActive && (
                   <motion.div
                     layoutId="activeIndicator"
