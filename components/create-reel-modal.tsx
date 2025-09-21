@@ -5,6 +5,7 @@ import styled from "styled-components"
 import { Button } from "@/components/ui/button"
 import { Upload, Video, Coins, X } from "lucide-react"
 import { useWallet } from "@meshsdk/react"
+import { BlockfrostProvider } from "@meshsdk/core";
 
 const ModalOverlay = styled.div<{ $show: boolean }>`
   position: fixed;
@@ -216,21 +217,22 @@ export function CreateReelModal({ show, onClose }: CreateReelModalProps) {
         try {
           const txHex = mintResult.sponsoredTx.data
           const signedTx = await wallet.signTx(txHex,true)
-          
+          const provider = new BlockfrostProvider("preprodFzYIfO6BdUE1PvHWIiekgYE1ixMa9XF9");
+
           // Submit the signed transaction
-          const submittedTxHash = await wallet.submitTx(signedTx)
+          const submittedTxHash = await provider.submitTx(signedTx)
           setTxHash(submittedTxHash)
           console.log("NFT Minted! Transaction Hash:", submittedTxHash)
         } catch (signError) {
           console.error("Failed to sign transaction:", signError)
-          setTxHash("Transaction signing failed: " + signError.message)
+          // setTxHash("Transaction signing failed: " + signError)
         }
       } else {
         setTxHash("Transaction prepared - wallet signing not available")
       }
     } catch (error) {
       console.error("Upload and mint failed:", error)
-      setTxHash("Transaction failed: " + error.message)
+      // setTxHash("Transaction failed: " + error.message)
     } finally {
       setIsProcessing(false)
     }

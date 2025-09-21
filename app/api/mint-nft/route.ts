@@ -72,42 +72,33 @@ export async function POST(request: NextRequest) {
     const tokenNameHex = stringToHex(tokenName)
     const metadata = { [policyId]: { [tokenName]: { ...demoAssetMetadata } } }
 
-    console.log("Getting static info...")
-    console.log("SDK object:", Object.keys(sdk))
-    console.log("SDK sponsorship exists:", !!sdk.sponsorship)
-    console.log("SDK sponsorship methods:", sdk.sponsorship ? Object.getOwnPropertyNames(Object.getPrototypeOf(sdk.sponsorship)) : "N/A")
-    console.log("Environment variables check:")
-    console.log("UTXOS_SPONSORSHIP_ID:", process.env.UTXOS_SPONSORSHIP_ID)
-    console.log("NEXT_PUBLIC_UTXOS_PROJECT_ID:", process.env.NEXT_PUBLIC_UTXOS_PROJECT_ID)
-    console.log("UTXOS_API_KEY:", process.env.UTXOS_API_KEY ? "SET" : "NOT SET")
-    console.log("UTXOS_PRIVATE_KEY:", process.env.UTXOS_PRIVATE_KEY ? "SET" : "NOT SET")
+    let staticInfo
     
-    // Skip getStaticInfo for now and use hardcoded values
-    console.log("Skipping getStaticInfo due to error, using hardcoded values")
-    const staticInfo = {
-      changeAddress: "addr_test1qrsj3xj6q99m4g9tu9mm2lzzdafy04035eya7hjhpus55r204nlu6dmhgpruq7df228h9gpujt0mtnfcnkcaj3wj457q5zv6kz",
-      utxo: {
-        input: {
-          txHash: "5a1edf7da58eff2059030abd456947a96cb2d16b9d8c3822ffff58d167ed8bfc",
-          outputIndex: 0
+    try {
+      staticInfo = await sdk.sponsorship.getStaticInfo()
+    } catch (error) {
+      console.log("getStaticInfo failed, fetching UTXOs from provider:", error)
+      const sponsorshipAddress = "addr_test1qrsj3xj6q99m4g9tu9mm2lzzdafy04035eya7hjhpus55r204nlu6dmhgpruq7df228h9gpujt0mtnfcnkcaj3wj457q5zv6kz"
+      const utxos = await provider.fetchUTxOs(sponsorshipAddress)
+      
+      if (utxos.length === 0) throw new Error("No UTXOs available")
+      
+      const utxo = utxos[0]
+      staticInfo = {
+        changeAddress: sponsorshipAddress,
+        utxo: {
+          input: { txHash: utxo.input.txHash, outputIndex: utxo.input.outputIndex },
+          output: { address: utxo.output.address, amount: utxo.output.amount }
         },
-        output: {
-          address: "addr_test1qrsj3xj6q99m4g9tu9mm2lzzdafy04035eya7hjhpus55r204nlu6dmhgpruq7df228h9gpujt0mtnfcnkcaj3wj457q5zv6kz",
-          amount: [{ unit: "lovelace", quantity: "5000000" }]
-        }
-      },
-      collateral: {
-        input: {
-          txHash: "5a1edf7da58eff2059030abd456947a96cb2d16b9d8c3822ffff58d167ed8bfc",
-          outputIndex: 1
-        },
-        output: {
-          address: "addr_test1qrsj3xj6q99m4g9tu9mm2lzzdafy04035eya7hjhpus55r204nlu6dmhgpruq7df228h9gpujt0mtnfcnkcaj3wj457q5zv6kz",
-          amount: [{ unit: "lovelace", quantity: "5000000" }]
+        collateral: utxos.length > 1 ? {
+          input: { txHash: utxos[1].input.txHash, outputIndex: utxos[1].input.outputIndex },
+          output: { address: utxos[1].output.address, amount: utxos[1].output.amount }
+        } : {
+          input: { txHash: utxo.input.txHash, outputIndex: utxo.input.outputIndex },
+          output: { address: utxo.output.address, amount: utxo.output.amount }
         }
       }
     }
-    console.log("Using hardcoded static info:", staticInfo)
 
     txBuilder
       .mint("1", policyId, tokenNameHex)
