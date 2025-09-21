@@ -2,37 +2,60 @@
 
 import styled from "styled-components"
 import { useScrollRewards } from "@/hooks/use-scroll-rewards"
+import { useState, useEffect } from "react"
+import { useIsMobile } from "@/hooks/use-mobile"
 
-const ProgressContainer = styled.div`
-  position: fixed;
-  top: ${({ theme }) => theme.spacing.lg};
-  right: ${({ theme }) => theme.spacing.lg};
-  background: rgba(0, 0, 0, 0.8);
+const ProgressContainer = styled.div<{ $expanded: boolean; $isMobile: boolean }>`
+  position: fixed !important;
+  top: 0 !important;
+  left: ${({ $isMobile }) => ($isMobile ? '0 !important' : '280px !important')};
+  right: 0 !important;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(26, 26, 26, 0.95));
   backdrop-filter: blur(20px);
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  padding: ${({ theme }) => theme.spacing.md};
-  z-index: 1000;
-  min-width: 280px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.primary};
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: ${({ $expanded }) => ($expanded ? "1rem" : "0.75rem 1rem")};
+  z-index: 9999 !important;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: ${({ $expanded }) => ($expanded ? "auto" : "70px")};
+  overflow: hidden;
+  
+  &:hover {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(26, 26, 26, 0.98));
+    border-bottom-color: ${({ theme }) => theme.colors.secondary};
+  }
 `
 
-const ProgressHeader = styled.div`
+const ProgressHeader = styled.div<{ $expanded: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  margin-bottom: ${({ $expanded }) => ($expanded ? "0.5rem" : "0")};
 `
 
 const ProgressTitle = styled.h4`
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: ${({ theme }) => theme.colors.text};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &::before {
+    content: "⚡";
+    font-size: 1rem;
+  }
 `
 
 const EarningsCount = styled.span`
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: ${({ theme }) => theme.colors.primary};
-  font-weight: 600;
+  font-weight: 700;
+  background: rgba(99, 219, 154, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(99, 219, 154, 0.2);
 `
 
 const ProgressBarContainer = styled.div`
@@ -40,20 +63,40 @@ const ProgressBarContainer = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.md};
 `
 
-const ProgressBar = styled.div`
+const ProgressBar = styled.div<{ $expanded: boolean }>`
   width: 100%;
-  height: 8px;
-  background: ${({ theme }) => theme.colors.border};
-  border-radius: 4px;
+  height: ${({ $expanded }) => ($expanded ? "10px" : "6px")};
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
   overflow: hidden;
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  margin-bottom: ${({ $expanded }) => ($expanded ? "0.5rem" : "0")};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 `
 
 const ProgressFill = styled.div<{ $progress: number }>`
   height: 100%;
   width: ${(props) => props.$progress}%;
-  background: linear-gradient(90deg, ${({ theme }) => theme.colors.primary}, ${({ theme }) => theme.colors.secondary});
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, ${({ theme }) => theme.colors.primary}, ${({ theme }) => theme.colors.secondary}, ${({ theme }) => theme.colors.accent});
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(99, 219, 154, 0.3);
+  position: relative;
+  
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
 `
 
 const MilestonesContainer = styled.div`
@@ -78,11 +121,18 @@ const Milestone = styled.div<{ $position: number; $achieved: boolean }>`
   z-index: 2;
 `
 
+const ExpandedContent = styled.div<{ $expanded: boolean }>`
+  opacity: ${({ $expanded }) => ($expanded ? 1 : 0)};
+  max-height: ${({ $expanded }) => ($expanded ? "500px" : "0")};
+  transition: all 0.3s ease;
+  overflow: hidden;
+`
+
 const MilestoneRewards = styled.div`
   display: flex;
   justify-content: space-between;
   font-size: 0.7rem;
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  margin-bottom: 0.5rem;
   opacity: 0.8;
 `
 
@@ -105,12 +155,12 @@ const StreakBonus = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: ${({ theme }) => theme.spacing.xs};
-  margin-top: ${({ theme }) => theme.spacing.sm};
-  padding: ${({ theme }) => theme.spacing.xs};
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  padding: 0.25rem;
   background: rgba(255, 215, 0, 0.1);
   border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: ${({ theme }) => theme.borderRadius.md};
+  border-radius: 0.5rem;
   font-size: 0.7rem;
   color: #ffd700;
 `
@@ -143,17 +193,36 @@ const ProgressText = styled.div`
   color: ${({ theme }) => theme.colors.text};
   opacity: 0.7;
   text-align: center;
+  margin-top: 0.5rem;
 `
 
 const ResetTimer = styled.div`
   font-size: 0.7rem;
   color: ${({ theme }) => theme.colors.accent};
   text-align: center;
-  margin-top: ${({ theme }) => theme.spacing.xs};
+  margin-top: 0.25rem;
+`
+
+const ExpandIndicator = styled.div<{ $expanded: boolean }>`
+  font-size: 0.8rem;
+  color: ${({ theme }) => theme.colors.primary};
+  opacity: 0.8;
+  transform: ${({ $expanded }) => ($expanded ? "rotate(180deg)" : "rotate(0deg)")};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.25rem;
+  border-radius: 50%;
+  background: rgba(99, 219, 154, 0.1);
+  
+  &:hover {
+    opacity: 1;
+    background: rgba(99, 219, 154, 0.2);
+  }
 `
 
 export function ScrollProgress() {
   const { dailyEarnings, canEarn, timeUntilReset, streakDays } = useScrollRewards()
+  const [expanded, setExpanded] = useState(false)
+  const isMobile = useIsMobile()
 
   const DAILY_LIMIT = 100
   const progress = (dailyEarnings / DAILY_LIMIT) * 100
@@ -186,53 +255,60 @@ export function ScrollProgress() {
   const streakMultiplier = Math.min(1 + streakDays * 0.1, 2.0)
 
   return (
-    <ProgressContainer>
-      <ProgressHeader>
+    <ProgressContainer $expanded={expanded} $isMobile={isMobile} onClick={() => setExpanded(!expanded)}>
+      <ProgressHeader $expanded={expanded}>
         <ProgressTitle>Daily Progress</ProgressTitle>
-        <EarningsCount>
-          {dailyEarnings}/{DAILY_LIMIT}
-        </EarningsCount>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <EarningsCount>
+            {dailyEarnings}/{DAILY_LIMIT}
+          </EarningsCount>
+          <ExpandIndicator $expanded={expanded}>▼</ExpandIndicator>
+        </div>
       </ProgressHeader>
 
       <ProgressBarContainer>
-        <ProgressBar>
+        <ProgressBar $expanded={expanded}>
           <ProgressFill $progress={progress} />
         </ProgressBar>
 
-        <MilestonesContainer>
-          {milestones.map((milestone, index) => (
-            <Milestone key={index} $position={milestone.threshold} $achieved={dailyEarnings >= milestone.threshold} />
-          ))}
-        </MilestonesContainer>
+        {expanded && (
+          <MilestonesContainer>
+            {milestones.map((milestone, index) => (
+              <Milestone key={index} $position={milestone.threshold} $achieved={dailyEarnings >= milestone.threshold} />
+            ))}
+          </MilestonesContainer>
+        )}
       </ProgressBarContainer>
 
-      <MilestoneRewards>
-        {milestones.map((milestone, index) => (
-          <MilestoneReward
-            key={index}
-            $achieved={dailyEarnings >= milestone.threshold}
-            $current={currentMilestone?.threshold === milestone.threshold}
-          >
-            {milestone.threshold}: {milestone.reward}
-          </MilestoneReward>
-        ))}
-      </MilestoneRewards>
+      <ExpandedContent $expanded={expanded}>
+        <MilestoneRewards>
+          {milestones.map((milestone, index) => (
+            <MilestoneReward
+              key={index}
+              $achieved={dailyEarnings >= milestone.threshold}
+              $current={currentMilestone?.threshold === milestone.threshold}
+            >
+              {milestone.threshold}: {milestone.reward}
+            </MilestoneReward>
+          ))}
+        </MilestoneRewards>
 
-      {streakDays > 0 && (
-        <StreakBonus>
-          🔥 {streakDays} Day Streak • {((streakMultiplier - 1) * 100).toFixed(0)}% Bonus
-        </StreakBonus>
-      )}
+        {streakDays > 0 && (
+          <StreakBonus>
+            🔥 {streakDays} Day Streak • {((streakMultiplier - 1) * 100).toFixed(0)}% Bonus
+          </StreakBonus>
+        )}
 
-      <ProgressText>
-        {nextMilestone
-          ? `${nextMilestone.threshold - dailyEarnings} more for ${nextMilestone.reward}!`
-          : canEarn
-            ? "Keep scrolling to earn more!"
-            : "Daily limit reached! Come back tomorrow!"}
-      </ProgressText>
+        <ProgressText>
+          {nextMilestone
+            ? `${nextMilestone.threshold - dailyEarnings} more for ${nextMilestone.reward}!`
+            : canEarn
+              ? "Keep scrolling to earn more!"
+              : "Daily limit reached! Come back tomorrow!"}
+        </ProgressText>
 
-      <ResetTimer>Resets in {formatTimeUntilReset(timeUntilReset)}</ResetTimer>
+        <ResetTimer>Resets in {formatTimeUntilReset(timeUntilReset)}</ResetTimer>
+      </ExpandedContent>
     </ProgressContainer>
   )
 }

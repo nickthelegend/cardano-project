@@ -11,6 +11,8 @@ const ChallengesContainer = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.xl};
   padding: ${({ theme }) => theme.spacing.xl};
   margin-bottom: ${({ theme }) => theme.spacing.xl};
+  max-width: 800px;
+  margin: 0 auto ${({ theme }) => theme.spacing.xl} auto;
 `
 
 const ChallengesTitle = styled.h2`

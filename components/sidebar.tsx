@@ -3,7 +3,8 @@
 import styled from "styled-components"
 import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 import Link from "next/link"
-import { Copy } from "lucide-react"
+import { Copy, Home, Video, Trophy, Target, User, Menu, X } from "lucide-react"
+import { useState } from "react"
 
 const SidebarContainer = styled.aside`
   position: fixed;
@@ -11,10 +12,10 @@ const SidebarContainer = styled.aside`
   top: 0;
   width: 280px;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.9);
   backdrop-filter: blur(20px);
   border-right: 1px solid ${({ theme }) => theme.colors.border};
-  padding: ${({ theme }) => theme.spacing.xl};
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -24,18 +25,20 @@ const SidebarContainer = styled.aside`
   }
 `
 
+
+
 const UserProfile = styled.div`
-  padding: ${({ theme }) => theme.spacing.md};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  padding: 1rem;
+  border-radius: 12px;
   background: rgba(0, 0, 0, 0.4);
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
+  margin-bottom: 2rem;
 `
 
 const ProfileHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-bottom: ${({ theme }) => theme.spacing.md};
+  gap: 1rem;
+  margin-bottom: 1rem;
 `
 
 const Avatar = styled.div`
@@ -65,10 +68,10 @@ const Username = styled.h3`
 const WalletSection = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm};
+  gap: 0.5rem;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  padding: ${({ theme }) => theme.spacing.sm};
+  border-radius: 8px;
+  padding: 0.5rem;
 `
 
 const WalletAddress = styled.span`
@@ -113,9 +116,9 @@ const NavLink = styled(Link)<{ $active?: boolean }>`
   width: 100%;
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
-  padding: ${({ theme }) => theme.spacing.md};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
   background: ${({ $active, theme }) => ($active ? "rgba(99, 219, 154, 0.4)" : "transparent")};
   color: ${({ $active, theme }) => ($active ? "#ffffff" : "#cccccc")};
   text-decoration: none;
@@ -123,7 +126,6 @@ const NavLink = styled(Link)<{ $active?: boolean }>`
   font-size: 0.95rem;
   font-weight: 500;
   transition: all 0.2s ease;
-  text-align: left;
 
   &:hover {
     background: rgba(99, 219, 154, 0.3);
@@ -134,10 +136,15 @@ const NavLink = styled(Link)<{ $active?: boolean }>`
 const NavIcon = styled.span`
   font-size: 1.2rem;
   width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
 `
+
+
+
+
 
 
 
@@ -173,6 +180,14 @@ export function Sidebar({ activeView }: SidebarProps) {
 
   if (!user) return null
 
+  const navItems = [
+    { id: "home", icon: Home, label: "Home", href: "/home" },
+    { id: "reel", icon: Video, label: "Reel Feed", href: "/reel" },
+    { id: "wallet", icon: User, label: "Profile", href: "/profile" },
+    { id: "leaderboard", icon: Trophy, label: "Leaderboard", href: "/leaderboard" },
+    { id: "challenges", icon: Target, label: "Challenges", href: "/challenges" }
+  ]
+
   return (
     <SidebarContainer>
       <UserProfile>
@@ -194,36 +209,21 @@ export function Sidebar({ activeView }: SidebarProps) {
 
       <Navigation>
         <NavList>
-          <NavItem>
-            <NavLink href="/home" $active={activeView === "home"}>
-              <NavIcon>🏠</NavIcon>
-              Home
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink href="/reel" $active={activeView === "reel"}>
-              <NavIcon>🎬</NavIcon>
-              Reel Feed
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink href="/wallet" $active={activeView === "wallet"}>
-              <NavIcon>💰</NavIcon>
-              Token Wallet
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink href="/leaderboard" $active={activeView === "leaderboard"}>
-              <NavIcon>🏆</NavIcon>
-              Leaderboard
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink href="/challenges" $active={activeView === "challenges"}>
-              <NavIcon>🎯</NavIcon>
-              Daily Challenges
-            </NavLink>
-          </NavItem>
+          {navItems.map((item) => {
+            const Icon = item.icon
+            const isActive = activeView === item.id
+            
+            return (
+              <NavItem key={item.id}>
+                <NavLink href={item.href} $active={isActive}>
+                  <NavIcon>
+                    <Icon size={20} />
+                  </NavIcon>
+                  {item.label}
+                </NavLink>
+              </NavItem>
+            )
+          })}
         </NavList>
       </Navigation>
 

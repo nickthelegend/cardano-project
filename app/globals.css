@@ -173,3 +173,39 @@ textarea {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
 }
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+}
+
+/* Ensure proper viewport handling */
+@viewport {
+  width: device-width;
+  initial-scale: 1;
+}
+
+/* Prevent horizontal scroll on mobile */
+body {
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 768px) {
+  button, 
+  [role="button"], 
+  input[type="button"], 
+  input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
