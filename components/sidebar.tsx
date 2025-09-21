@@ -97,6 +97,21 @@ const CopyButton = styled.button`
   }
 `
 
+const AdaBalance = styled.div`
+  font-size: 0.9rem;
+  color: ${({ theme }) => theme.colors.primary};
+  font-weight: 600;
+  margin-top: ${({ theme }) => theme.spacing.xs};
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xs};
+
+  &::before {
+    content: "₳";
+    font-size: 0.8rem;
+  }
+`
+
 const Navigation = styled.nav`
   flex: 1;
 `
@@ -165,10 +180,11 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeView }: SidebarProps) {
-  const { connected, address, name, disconnect } = useWallet()
+  const { connected, address, name, disconnect, wallet } = useWallet()
   const { getUserData } = useWalletMigration()
   const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [isClient, setIsClient] = useState(false)
+  const [adaBalance, setAdaBalance] = useState<number | null>(null)
 
   // Set client-side flag
   useEffect(() => {
@@ -186,6 +202,31 @@ export function Sidebar({ activeView }: SidebarProps) {
       }
     }
   }, [connected, getUserData, isClient])
+
+  // Fetch ADA balance when wallet is connected
+  useEffect(() => {
+    async function fetchAdaBalance() {
+      if (connected && wallet) {
+        try {
+          const utxos = await wallet.getUtxos()
+          const totalLovelace = utxos.reduce((sum, utxo) => {
+            const lovelace = utxo.output.amount.find(
+              (asset) => asset.unit === "lovelace",
+            )
+            return sum + parseInt(lovelace?.quantity || "0")
+          }, 0)
+          setAdaBalance(totalLovelace / 1_000_000)
+        } catch (error) {
+          console.error("Failed to fetch ADA balance:", error)
+          setAdaBalance(null)
+        }
+      } else {
+        setAdaBalance(null)
+      }
+    }
+
+    fetchAdaBalance()
+  }, [connected, wallet])
 
   const copyToClipboard = async () => {
     if (address) {
@@ -230,6 +271,11 @@ export function Sidebar({ activeView }: SidebarProps) {
             <Copy size={14} />
           </CopyButton>
         </WalletSection>
+        {adaBalance !== null && (
+          <AdaBalance>
+            {adaBalance.toFixed(2)} ADA
+          </AdaBalance>
+        )}
       </UserProfile>
 
       <Navigation>

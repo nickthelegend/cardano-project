@@ -12,6 +12,9 @@ const HomeContainer = styled.div`
   flex-direction: column;
   height: 100%;
   gap: ${({ theme }) => theme.spacing.lg};
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 `
 
 const WelcomeSection = styled.div`
@@ -21,6 +24,7 @@ const WelcomeSection = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius.xl};
   padding: ${({ theme }) => theme.spacing.xl};
   text-align: center;
+  width: 100%;
 `
 
 const WelcomeTitle = styled.h1`

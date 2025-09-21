@@ -25,12 +25,19 @@ const MainContent = styled.main<{ $isMobile: boolean; $hasAuth: boolean }>`
   flex-direction: column;
   margin-left: ${({ $isMobile, $hasAuth }) => ($isMobile || !$hasAuth ? '0' : '280px')};
   padding-bottom: ${({ $isMobile, $hasAuth }) => ($isMobile && $hasAuth ? '80px' : '0')};
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
 `
 
 const ContentArea = styled.div`
   flex: 1;
   display: flex;
+  justify-content: center;
+  align-items: flex-start;
   position: relative;
+  padding: ${({ theme }) => theme.spacing.xl};
+  max-width: 100%;
 `
 
 export function AppShell({ children }: { children: React.ReactNode }) {
