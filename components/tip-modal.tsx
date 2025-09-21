@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 
 const ModalOverlay = styled.div<{ $show: boolean }>`
   position: fixed;
@@ -235,7 +235,7 @@ const tipAmounts = [250, 500, 1000, 2500, 5000, 10000]
 
 export function TipModal({ show, onClose, creatorName, reelId }: TipModalProps) {
   const { connected, name } = useWallet()
-  const { getUserData } = useWalletMigration()
+   
   const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [selectedAmount, setSelectedAmount] = useState(0)
   const [customAmount, setCustomAmount] = useState("")

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 
 const ConversionContainer = styled.div`
   background: rgba(0, 0, 0, 0.4);
@@ -130,7 +130,7 @@ const BreakdownRow = styled.div`
 
 export function TokenConversion() {
   const { connected, name } = useWallet()
-  const { getUserData } = useWalletMigration()
+   
   const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [scrollAmount, setScrollAmount] = useState("")
   const [isClient, setIsClient] = useState(false)

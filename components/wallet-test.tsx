@@ -1,7 +1,7 @@
 "use client"
 
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 import { useEffect, useState } from "react"
 import styled from "styled-components"
 

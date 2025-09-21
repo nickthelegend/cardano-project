@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 
 const QuestsContainer = styled.div`
   background: rgba(0, 0, 0, 0.4);
@@ -354,7 +354,7 @@ const mockQuests: Quest[] = [
 
 export function QuestsPanel() {
   const { connected } = useWallet()
-  const { getUserData } = useWalletMigration()
+   
   const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [activeTab, setActiveTab] = useState<QuestType>("daily")
   const [quests, setQuests] = useState<Quest[]>(mockQuests)

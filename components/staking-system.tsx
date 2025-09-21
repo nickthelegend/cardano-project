@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 
 const StakingContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
@@ -174,7 +174,7 @@ const stakingTiers = [
 
 export function StakingSystem() {
   const { connected, name } = useWallet()
-  const { getUserData } = useWalletMigration()
+   
   const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [selectedTier, setSelectedTier] = useState(0)
   const [isClient, setIsClient] = useState(false)

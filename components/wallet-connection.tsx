@@ -1,6 +1,6 @@
 "use client"
 
-import { CardanoWallet, useWallet } from "@meshsdk/react"
+import {  useWallet } from "@meshsdk/react"
 import { BlockfrostProvider } from "@meshsdk/core"
 import { useState, useEffect } from "react"
 import "@meshsdk/react/styles.css";
@@ -10,12 +10,17 @@ import "../app/globals.css";
 const blockfrostProvider = new BlockfrostProvider("preprodFzYIfO6BdUE1PvHWIiekgYE1ixMa9XF9")
 
 export function WalletConnection() {
-  const { wallet, connected, connecting } = useWallet()
+  const { connected, name , connect, wallet, setWallet, connecting} = useWallet()
   const [balance, setBalance] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
-
+  
   // Fetch wallet balance when connected
   useEffect(() => {
+    
+    // if (!connected) {
+    //   setWallet(wallet, "utxos", { persist: true })
+    //   connect("utxos")
+    // }
     async function fetchBalance() {
       if (connected && wallet) {
         try {
@@ -175,16 +180,15 @@ export function WalletConnection() {
               width: '100%'
             }}
           >
-            <CardanoWallet
+            {/* <CardanoWallet
               web3Services={{
                 networkId: parseInt(process.env.NEXT_PUBLIC_NETWORK_ID || "0") as 0 | 1,
                 fetcher: blockfrostProvider,
                 submitter: blockfrostProvider,
                 projectId: process.env.NEXT_PUBLIC_UTXOS_PROJECT_ID,
               }}
-              persist={true} // Enable session persistence
-
-            />
+              persist={true}
+            /> */}
           </div>
 
           {connecting && (

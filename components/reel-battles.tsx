@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 
 const BattlesContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -223,7 +223,7 @@ interface Battle {
 
 export function ReelBattles() {
   const { connected, name } = useWallet()
-  const { getUserData } = useWalletMigration()
+   
   const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [battles, setBattles] = useState<Battle[]>([])
   const [battleTitle, setBattleTitle] = useState("")

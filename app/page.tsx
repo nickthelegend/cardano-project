@@ -2,7 +2,7 @@
 
 import { CardanoWallet, useWallet } from "@meshsdk/react"
 import { BlockfrostProvider } from "@meshsdk/core"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import "@meshsdk/react/styles.css";
@@ -11,25 +11,15 @@ import "@meshsdk/react/styles.css";
 const blockfrostProvider = new BlockfrostProvider("preprodFzYIfO6BdUE1PvHWIiekgYE1ixMa9XF9")
 
 export default function RootPage() {
-  const { connected, connecting } = useWallet()
-  const { getUserData, migrateUserData } = useWalletMigration()
+  const { connected, name , connect, wallet, setWallet, connecting} = useWallet()
+  console.log(name)
   const router = useRouter()
-  const [hasMigratedData, setHasMigratedData] = useState(false)
-
-  // Check for migrated data on component mount
-  useEffect(() => {
-    migrateUserData().then((migratedUser) => {
-      if (migratedUser) {
-        setHasMigratedData(true)
-      }
-    })
-  }, [migrateUserData])
 
   useEffect(() => {
-    if (connected || hasMigratedData) {
+    if (connected) {
       router.push("/home")
     }
-  }, [connected, hasMigratedData, router])
+  }, [connected, router])
 
   if (connecting) {
     return (

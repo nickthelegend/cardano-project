@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 import { useEnergySystem } from "./use-energy-system"
 
 interface ScrollReward {
@@ -27,7 +27,7 @@ const REWARD_RANGE = { min: 1, max: 8 } // Token reward range
 
 export function useScrollRewards(): UseScrollRewardsReturn {
   const { connected } = useWallet()
-  const { getUserData } = useWalletMigration()
+
   const { canScroll, consumeEnergy } = useEnergySystem() // Added energy system integration
   const [showReward, setShowReward] = useState(false)
   const [rewardAmount, setRewardAmount] = useState(0)

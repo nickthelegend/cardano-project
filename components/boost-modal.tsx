@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 
 const ModalOverlay = styled.div<{ $show: boolean }>`
   position: fixed;
@@ -259,32 +259,11 @@ const vibeBoosts: BoostTier[] = [
 
 export function BoostModal({ show, onClose, reelId }: BoostModalProps) {
   const { connected, name } = useWallet()
-  const { getUserData } = useWalletMigration()
-  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [selectedBoost, setSelectedBoost] = useState<string>("")
-  const [isClient, setIsClient] = useState(false)
 
-  // Set client-side flag
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  if (!connected) return null
 
-  // Update user data when wallet connection changes (only on client)
-  useEffect(() => {
-    if (isClient) {
-      if (connected) {
-        const data = getUserData()
-        setUserData(data)
-      } else {
-        setUserData(null)
-      }
-    }
-  }, [connected, getUserData, isClient])
-
-  if (!connected && !userData) return null
-
-  // Use migrated data or create default data for connected wallet
-  const user = userData || {
+  const user = {
     username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
     scrollTokens: 0,
     vibeTokens: 100,

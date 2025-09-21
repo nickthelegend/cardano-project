@@ -4,8 +4,10 @@ import styled from "styled-components"
 import { ScrollProgress } from "./scroll-progress"
 import { ReelFeed } from "./reel-feed"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+import { CreateReelModal } from "./create-reel-modal"
 import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
 
 const HomeContainer = styled.div`
   display: flex;
@@ -88,33 +90,12 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ canScroll = true }: HomeScreenProps) {
-  const { connected, name } = useWallet()
-  const { getUserData } = useWalletMigration()
-  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
-  const [isClient, setIsClient] = useState(false)
+  const { connected, name , connect, wallet, setWallet} = useWallet()
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  
+  if (!connected) return null
 
-  // Set client-side flag
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  // Update user data when wallet connection changes (only on client)
-  useEffect(() => {
-    if (isClient) {
-      if (connected) {
-        const data = getUserData()
-        setUserData(data)
-      } else {
-        setUserData(null)
-      }
-    }
-  }, [connected, getUserData, isClient])
-
-  // If not connected and no migrated data, return null
-  if (!connected && !userData) return null
-
-  // Use migrated data or create default data for connected wallet
-  const user = userData || {
+  const user = {
     username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
     scrollTokens: 0,
     vibeTokens: 100,
@@ -150,9 +131,20 @@ export function HomeScreen({ canScroll = true }: HomeScreenProps) {
             <StatLabel>Day Streak</StatLabel>
           </StatCard>
         </QuickStats>
+        
+        <Button 
+          onClick={() => setShowCreateModal(true)}
+          style={{ marginTop: "1rem" }}
+        >
+          <Plus className="mr-2" size={16} />
+          Create Reel
+        </Button>
       </WelcomeSection>
 
-
+      <CreateReelModal 
+        show={showCreateModal} 
+        onClose={() => setShowCreateModal(false)} 
+      />
     </HomeContainer>
   )
 }

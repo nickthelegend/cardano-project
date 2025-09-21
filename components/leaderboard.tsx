@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 
 const LeaderboardContainer = styled.div`
   background: rgba(255, 255, 255, 0.05);
@@ -214,7 +214,7 @@ type LeaderboardTab = "scroll" | "vibe" | "total" | "streak"
 
 export function Leaderboard() {
   const { connected, name } = useWallet()
-  const { getUserData } = useWalletMigration()
+   
   const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [activeTab, setActiveTab] = useState<LeaderboardTab>("total")
   const [leaderboard] = useState<LeaderboardUser[]>(mockLeaderboard)

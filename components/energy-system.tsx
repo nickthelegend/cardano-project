@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 
 const EnergyContainer = styled.div`
   position: fixed;
@@ -94,29 +94,9 @@ interface EnergySystemProps {
 
 export function EnergySystem({ onEnergyChange }: EnergySystemProps) {
   const { connected } = useWallet()
-  const { getUserData } = useWalletMigration()
-  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [energy, setEnergy] = useState(100) // Start with full energy
   const [lastRechargeTime, setLastRechargeTime] = useState(Date.now())
   const [showWarning, setShowWarning] = useState(false)
-  const [isClient, setIsClient] = useState(false)
-
-  // Set client-side flag
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  // Update user data when wallet connection changes (only on client)
-  useEffect(() => {
-    if (isClient) {
-      if (connected) {
-        const data = getUserData()
-        setUserData(data)
-      } else {
-        setUserData(null)
-      }
-    }
-  }, [connected, getUserData, isClient])
 
   const MAX_ENERGY = 100
   const ENERGY_PER_SCROLL = 2 // Each scroll costs 2 energy
@@ -175,7 +155,7 @@ export function EnergySystem({ onEnergyChange }: EnergySystemProps) {
     ;(window as any).consumeEnergy = consumeEnergy
   }, [energy])
 
-  if (!connected && !userData) return null
+  if (!connected) return null
 
   const energyPercentage = (energy / MAX_ENERGY) * 100
   const canScroll = energy >= ENERGY_PER_SCROLL

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 
 const ProfileContainer = styled.div`
   background: rgba(0, 0, 0, 0.4);
@@ -389,7 +389,7 @@ const mockAchievements: Achievement[] = [
 
 export function ProfileBadges() {
   const { connected, name } = useWallet()
-  const { getUserData } = useWalletMigration()
+   
   const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [activeTab, setActiveTab] = useState<BadgeCategory>("achievements")
   const [badges] = useState<Badge[]>(mockBadges)

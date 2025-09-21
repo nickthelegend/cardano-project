@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 
 const LeaderboardContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -197,7 +197,7 @@ interface LeaderboardUser {
 
 export function EnhancedLeaderboard() {
   const { connected, name } = useWallet()
-  const { getUserData } = useWalletMigration()
+   
   const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [activeTab, setActiveTab] = useState<LeaderboardType>("scrollers")
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>([])

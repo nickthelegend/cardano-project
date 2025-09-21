@@ -26,7 +26,8 @@ function WalletPersistenceHandler() {
 
 export function MeshProviderWrapper({ children }: MeshProviderWrapperProps) {
   return (
-    <MeshProvider>
+    <MeshProvider
+    >
       <WalletPersistenceHandler />
       {children}
     </MeshProvider>

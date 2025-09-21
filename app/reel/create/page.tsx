@@ -5,7 +5,8 @@ import styled from "styled-components"
 import { Button } from "@/components/ui/button"
 import { Upload, Video, Coins } from "lucide-react"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+import { AppShell } from "@/components/app-shell"
+
 
 const Container = styled.div`
   padding: ${({ theme }) => theme.spacing.xl};
@@ -84,38 +85,45 @@ const TxHash = styled.div`
 `
 
 export default function CreateReelPage() {
-  const { connected, address, name, wallet } = useWallet()
-  const { getUserData } = useWalletMigration()
-  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [isClient, setIsClient] = useState(false)
+  const { connected, name, wallet, connect } = useWallet()
+  const [address, setAddress] = useState<string>("")
+  const [connectionAttempted, setConnectionAttempted] = useState(false)
 
-  // Set client-side flag
   useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  // Update user data when wallet connection changes (only on client)
-  useEffect(() => {
-    if (isClient) {
-      if (connected) {
-        const data = getUserData()
-        setUserData(data)
-      } else {
-        setUserData(null)
-      }
+    // Only attempt connection once when component mounts
+    if (!connected && !connectionAttempted) {
+      setConnectionAttempted(true)
+      connect("utxos").catch((err) => {
+        console.error("Failed to connect wallet:", err)
+        console.error("Make sure UTXOS wallet is installed and available")
+      })
     }
-  }, [connected, getUserData, isClient])
+  }, [connected, connect, connectionAttempted])
 
-  // Use migrated data or create default data for connected wallet
-  const user = userData || {
-    username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
+  useEffect(() => {
+    // If connected, retrieve the wallet address
+    if (connected && wallet) {
+      wallet.getAddress().then((addr) => {
+        setAddress(addr)
+      }).catch((err) => {
+        console.error("Failed to get wallet address:", err)
+      })
+    }
+  }, [connected, wallet])
+
+  console.log("CreateReelPage - Connected:", connected)
+  console.log("CreateReelPage - Name:", name)
+  console.log("CreateReelPage - Wallet:", wallet)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+
+  const user = {
+    username: name ? `User_${String(name).slice(0, 8)}` : "Wallet User",
     walletAddress: address || "",
   }
   
-  console.log("CreateReelPage - User:", user)
-  console.log("CreateReelPage - Wallet:", wallet)
-  console.log("CreateReelPage - Wallet type:", typeof wallet)
+  // console.log("CreateReelPage - User:", user)
+  // console.log("CreateReelPage - Wallet:", wallet)
+  // console.log("CreateReelPage - Wallet type:", typeof wallet)
   const [isDragOver, setIsDragOver] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [ipfsUrl, setIpfsUrl] = useState<string>("") 
@@ -143,8 +151,8 @@ export default function CreateReelPage() {
     console.log("Wallet exists:", !!wallet)
     console.log("Wallet type:", typeof wallet)
     
-    if (!selectedFile || (!connected && !userData)) {
-      console.error("Missing requirements:", { selectedFile: !!selectedFile, connected, userData: !!userData })
+    if (!selectedFile || !connected) {
+      console.error("Missing requirements:", { selectedFile: !!selectedFile, connected })
       return
     }
 
@@ -198,8 +206,8 @@ export default function CreateReelPage() {
       console.log("Sponsored transaction:", mintResult.sponsoredTx)
       setTxHash("Transaction prepared - wallet signing not implemented yet")
       
-      setTxHash(submittedTxHash)
-      console.log("NFT Minted! Transaction Hash:", submittedTxHash)
+      // setTxHash(submittedTxHash)
+      // console.log("NFT Minted! Transaction Hash:", submittedTxHash)
     } catch (error) {
       console.error("Upload and mint failed:", error)
     } finally {
@@ -208,8 +216,18 @@ export default function CreateReelPage() {
   }
 
   return (
-    <Container>
+    <AppShell>
+      <Container>
       <Title>Create New Reel</Title>
+      
+      {connected ? (
+        <div style={{ marginBottom: "1rem", padding: "1rem", background: "rgba(99, 219, 154, 0.1)", borderRadius: "8px" }}>
+          <p>Connected Wallet: {name}</p>
+          <p>Wallet Address: {address}</p>
+        </div>
+      ) : (
+        <p style={{ marginBottom: "1rem", padding: "1rem", background: "rgba(255, 255, 255, 0.1)", borderRadius: "8px" }}>Connecting to wallet...</p>
+      )}
       
       <UploadArea
         $isDragOver={isDragOver}
@@ -242,7 +260,7 @@ export default function CreateReelPage() {
       {selectedFile && (
         <Button 
           onClick={uploadAndMint} 
-          disabled={isProcessing || (!connected && !userData)}
+          disabled={isProcessing}
           className="w-full"
         >
           <Coins className="mr-2" size={16} />
@@ -267,6 +285,7 @@ export default function CreateReelPage() {
           )}
         </ResultSection>
       )}
-    </Container>
+      </Container>
+    </AppShell>
   )
 }

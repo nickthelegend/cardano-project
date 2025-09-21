@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
-import { useWalletMigration } from "@/lib/wallet-migration"
+
 import { TokenConversion } from "./token-conversion"
 import { StakingSystem } from "./staking-system"
 import { GovernanceDAO } from "./governance-dao"
@@ -323,7 +323,7 @@ const mockTransactions: Transaction[] = [
 
 export function TokenWallet() {
   const { connected, name } = useWallet()
-  const { getUserData } = useWalletMigration()
+   
   const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
   const [transactions] = useState<Transaction[]>(mockTransactions)
   const [isClient, setIsClient] = useState(false)
