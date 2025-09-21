@@ -215,7 +215,7 @@ export function CreateReelModal({ show, onClose }: CreateReelModalProps) {
       if (mintResult.sponsoredTx?.success && mintResult.sponsoredTx?.data && wallet) {
         try {
           const txHex = mintResult.sponsoredTx.data
-          const signedTx = await wallet.signTx(txHex)
+          const signedTx = await wallet.signTx(txHex,true)
           
           // Submit the signed transaction
           const submittedTxHash = await wallet.submitTx(signedTx)
