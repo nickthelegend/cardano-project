@@ -210,9 +210,27 @@ export function CreateReelModal({ show, onClose }: CreateReelModalProps) {
         throw new Error(mintResult.error)
       }
 
-      setTxHash("Transaction prepared - wallet signing not implemented yet")
+      // Step 3: Sign and submit transaction
+      console.log("Step 3: Signing transaction...")
+      if (mintResult.sponsoredTx?.success && mintResult.sponsoredTx?.data && wallet) {
+        try {
+          const txHex = mintResult.sponsoredTx.data
+          const signedTx = await wallet.signTx(txHex)
+          
+          // Submit the signed transaction
+          const submittedTxHash = await wallet.submitTx(signedTx)
+          setTxHash(submittedTxHash)
+          console.log("NFT Minted! Transaction Hash:", submittedTxHash)
+        } catch (signError) {
+          console.error("Failed to sign transaction:", signError)
+          setTxHash("Transaction signing failed: " + signError.message)
+        }
+      } else {
+        setTxHash("Transaction prepared - wallet signing not available")
+      }
     } catch (error) {
       console.error("Upload and mint failed:", error)
+      setTxHash("Transaction failed: " + error.message)
     } finally {
       setIsProcessing(false)
     }
