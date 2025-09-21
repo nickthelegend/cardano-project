@@ -223,6 +223,18 @@ export function CreateReelModal({ show, onClose }: CreateReelModalProps) {
           const submittedTxHash = await provider.submitTx(signedTx)
           setTxHash(submittedTxHash)
           console.log("NFT Minted! Transaction Hash:", submittedTxHash)
+          
+          // Save to database
+          await fetch('/api/reels', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              uploadedBy: user?.walletAddress || address,
+              tokenId: mintResult.tokenId || 'unknown',
+              txnHash: submittedTxHash,
+              ipfsCid: uploadResult.url
+            })
+          })
         } catch (signError) {
           console.error("Failed to sign transaction:", signError)
           // setTxHash("Transaction signing failed: " + signError)
@@ -287,7 +299,7 @@ export function CreateReelModal({ show, onClose }: CreateReelModalProps) {
         {selectedFile && (
           <Button 
             onClick={uploadAndMint} 
-            disabled={isProcessing}
+            disabled={isProcessing || !connected}
             className="w-full"
           >
             <Coins className="mr-2" size={16} />
