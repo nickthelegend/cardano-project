@@ -1,7 +1,7 @@
 "use client"
 
 import { useWallet } from "@meshsdk/react"
-
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 import { useEffect, useState } from "react"
 import styled from "styled-components"
 
@@ -59,8 +59,7 @@ const InfoText = styled.p`
 
 export function WalletTest() {
   const { connected, name, address, disconnect } = useWallet()
-  const { getUserData, saveUserData, clearUserData, migrateUserData } = useWalletMigration()
-  const [userData, setUserData] = useState(getUserData())
+  const { user, connectWallet, disconnectWallet } = useUTXOSAuth()
   const [testResults, setTestResults] = useState<string[]>([])
 
   const addTestResult = (message: string, success = true) => {
@@ -69,7 +68,7 @@ export function WalletTest() {
 
   const runTests = async () => {
     setTestResults([])
-    addTestResult("Starting wallet migration tests...")
+    addTestResult("Starting wallet tests...")
 
     // Test 1: Check wallet connection
     if (connected) {
@@ -79,58 +78,21 @@ export function WalletTest() {
       addTestResult("No wallet connected", false)
     }
 
-    // Test 2: Check migration
-    try {
-      const migrated = await migrateUserData()
-      if (migrated) {
-        addTestResult(`Migration successful: ${migrated.username}`)
-        setUserData(migrated)
-      } else {
-        addTestResult("No data to migrate")
-      }
-    } catch (error) {
-      addTestResult(`Migration failed: ${error}`, false)
-    }
-
-    // Test 3: Check user data
-    const currentData = getUserData()
-    if (currentData) {
-      addTestResult(`User data found: ${currentData.username}`)
-      addTestResult(`Tokens: ${currentData.scrollTokens} SCROLL, ${currentData.vibeTokens} VIBE`)
+    // Test 2: Check user data
+    if (user) {
+      addTestResult(`User data found: ${user.username}`)
+      addTestResult(`Tokens: ${user.scrollTokens} SCROLL, ${user.vibeTokens} VIBE`)
+      addTestResult(`ADA Balance: ${user.adaBalance}`)
     } else {
       addTestResult("No user data found", false)
-    }
-
-    // Test 4: Test data persistence
-    if (connected) {
-      const testData = {
-        username: `Test_${name?.slice(0, 8)}`,
-        scrollTokens: 999,
-        vibeTokens: 888,
-      }
-      saveUserData(testData)
-      addTestResult("Test data saved")
-
-      const updatedData = getUserData()
-      if (updatedData && updatedData.scrollTokens === 999) {
-        addTestResult("Data persistence verified")
-      } else {
-        addTestResult("Data persistence failed", false)
-      }
     }
 
     addTestResult("Tests completed!")
   }
 
-  const clearAllData = () => {
-    clearUserData()
-    setUserData(null)
-    addTestResult("All user data cleared")
-  }
-
-  const disconnectWallet = async () => {
+  const handleDisconnect = async () => {
     try {
-      await disconnect()
+      disconnectWallet()
       addTestResult("Wallet disconnected")
     } catch (error) {
       addTestResult(`Disconnect failed: ${error}`, false)
@@ -150,13 +112,13 @@ export function WalletTest() {
 
       <TestSection>
         <TestTitle>User Data</TestTitle>
-        {userData ? (
+        {user ? (
           <div>
-            <InfoText><strong>Username:</strong> {userData.username}</InfoText>
-            <InfoText><strong>Scroll Tokens:</strong> {userData.scrollTokens}</InfoText>
-            <InfoText><strong>Vibe Tokens:</strong> {userData.vibeTokens}</InfoText>
-            <InfoText><strong>Daily Scrolls:</strong> {userData.dailyScrollCount}</InfoText>
-            <InfoText><strong>ADA Balance:</strong> {userData.adaBalance}</InfoText>
+            <InfoText><strong>Username:</strong> {user.username}</InfoText>
+            <InfoText><strong>Scroll Tokens:</strong> {user.scrollTokens}</InfoText>
+            <InfoText><strong>Vibe Tokens:</strong> {user.vibeTokens}</InfoText>
+            <InfoText><strong>Daily Scrolls:</strong> {user.dailyScrollCount}</InfoText>
+            <InfoText><strong>ADA Balance:</strong> {user.adaBalance}</InfoText>
           </div>
         ) : (
           <InfoText>No user data available</InfoText>
@@ -167,8 +129,8 @@ export function WalletTest() {
         <TestTitle>Test Controls</TestTitle>
         <div>
           <Button onClick={runTests}>Run All Tests</Button>
-          <Button onClick={clearAllData}>Clear All Data</Button>
-          {connected && <Button onClick={disconnectWallet}>Disconnect Wallet</Button>}
+          {!connected && <Button onClick={connectWallet}>Connect Wallet</Button>}
+          {connected && <Button onClick={handleDisconnect}>Disconnect Wallet</Button>}
         </div>
       </TestSection>
 
@@ -189,7 +151,7 @@ export function WalletTest() {
         <TestTitle>Instructions</TestTitle>
         <InfoText>1. Connect your wallet using the wallet connection component</InfoText>
         <InfoText>2. Run tests to verify migration and data persistence</InfoText>
-        <InfoText>3. Check that your old UTXOS data is properly migrated</InfoText>
+        <InfoText>3. Check that your UTXOS wallet data is loaded</InfoText>
         <InfoText>4. Verify that wallet connection persists across sessions</InfoText>
       </TestSection>
     </TestContainer>

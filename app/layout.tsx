@@ -6,6 +6,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import StyledComponentsRegistry from "@/lib/registry"
 import { MeshProviderWrapper } from "@/components/mesh-provider-wrapper"
+import { UTXOSAuthProvider } from "@/hooks/use-utxos-auth"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,7 +27,9 @@ export default function RootLayout({
         <StyledComponentsRegistry>
           <ThemeProvider>
             <MeshProviderWrapper>
-              {children}
+              <UTXOSAuthProvider>
+                {children}
+              </UTXOSAuthProvider>
             </MeshProviderWrapper>
           </ThemeProvider>
         </StyledComponentsRegistry>

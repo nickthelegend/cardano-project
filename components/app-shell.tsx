@@ -75,7 +75,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {showNavigation && (
         <>
           {/* <EnergyBar /> */}
-          {pathname === "/home" && <ScrollProgress />}
+          {pathname === "/home"}
         </>
       )}
     </AppContainer>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import styled from "styled-components"
 import { useWallet } from "@meshsdk/react"
+import { useUTXOSAuth } from "@/hooks/use-utxos-auth"
 
 
 const ModalOverlay = styled.div<{ $show: boolean }>`
@@ -235,34 +236,15 @@ const tipAmounts = [250, 500, 1000, 2500, 5000, 10000]
 
 export function TipModal({ show, onClose, creatorName, reelId }: TipModalProps) {
   const { connected, name } = useWallet()
-   
-  const [userData, setUserData] = useState<ReturnType<typeof getUserData>>(null)
+  const { user } = useUTXOSAuth()
   const [selectedAmount, setSelectedAmount] = useState(0)
   const [customAmount, setCustomAmount] = useState("")
   const [tipType, setTipType] = useState<"micro" | "regular">("micro")
-  const [isClient, setIsClient] = useState(false)
 
-  // Set client-side flag
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  if (!connected && !user) return null
 
-  // Update user data when wallet connection changes (only on client)
-  useEffect(() => {
-    if (isClient) {
-      if (connected) {
-        const data = getUserData()
-        setUserData(data)
-      } else {
-        setUserData(null)
-      }
-    }
-  }, [connected, getUserData, isClient])
-
-  if (!connected && !userData) return null
-
-  // Use migrated data or create default data for connected wallet
-  const user = userData || {
+  // Use UTXOS user data or create default data for connected wallet
+  const userData = user || {
     username: name ? `User_${name.slice(0, 8)}` : "Wallet User",
     scrollTokens: 0,
   }
@@ -272,7 +254,7 @@ export function TipModal({ show, onClose, creatorName, reelId }: TipModalProps) 
   const creatorReceives = tipAmount - platformFee
 
   const handleSendTip = () => {
-    if (tipAmount > 0 && tipAmount <= user.scrollTokens) {
+    if (tipAmount > 0 && tipAmount <= userData.scrollTokens) {
       console.log(`[v0] Sending ${tipAmount} $SCROLL tip to ${creatorName} for reel ${reelId}`)
       onClose()
     }
@@ -342,7 +324,7 @@ export function TipModal({ show, onClose, creatorName, reelId }: TipModalProps) 
             setCustomAmount(e.target.value)
             setSelectedAmount(0)
           }}
-          max={user.scrollTokens}
+          max={userData.scrollTokens}
         />
 
         {tipAmount > 0 && (
@@ -362,7 +344,7 @@ export function TipModal({ show, onClose, creatorName, reelId }: TipModalProps) 
           </TipSummary>
         )}
 
-        <SendTipButton onClick={handleSendTip} disabled={tipAmount <= 0 || tipAmount > user.scrollTokens}>
+        <SendTipButton onClick={handleSendTip} disabled={tipAmount <= 0 || tipAmount > userData.scrollTokens}>
           Send Tip
         </SendTipButton>
       </ModalContent>
