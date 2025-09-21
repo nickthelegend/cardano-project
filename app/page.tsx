@@ -176,7 +176,8 @@ export default function RootPage() {
                 submitter: blockfrostProvider,
                 projectId: process.env.NEXT_PUBLIC_UTXOS_PROJECT_ID,
               }}
-            />
+              persist={true} // Enable session persistence
+              />
           </div>
 
           {connecting && (
